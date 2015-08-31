@@ -1,0 +1,8 @@
+Got solution with 79 steps, length 81.3137207031 and deformation 1650.0 using pareto weight 0.03
+Got solution with 79 steps, length 78.0 and deformation 3600.0 using pareto weight 0.0
+Got solution with 79 steps, length 81.3137130737 and deformation 1665.0 using pareto weight 0.04
+Got solution with 106 steps, length 116.183792114 and deformation 900.0 using pareto weight 0.05
+Got solution with 211 steps, length 242.308746338 and deformation 0.0 using pareto weight 1.0
+Got solution with 79 steps, length 80.4852905273 and deformation 1650.0 using pareto weight 0.02
+Got solution with 79 steps, length 80.4852905273 and deformation 1660.0 using pareto weight 0.01
+Got solution with 154 steps, length 165.01222229 and deformation 0.0 using pareto weight 0.99

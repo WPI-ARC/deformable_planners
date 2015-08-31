@@ -1,0 +1,12 @@
+float64 run_time
+float64 total_cost
+float64 total_length
+deformable_ompl/SimplePathState[] path
+uint8 SUCCESS=0
+uint8 APPROXIMATE=1
+uint8 TIMEOUT=2
+uint8 INVALID_START=3
+uint8 INVALID_GOAL=4
+uint8 INVALID_PARAMETERS=5
+uint8 UNKNOWN_ERROR=10
+uint8 status

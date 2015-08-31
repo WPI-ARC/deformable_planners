@@ -1,0 +1,10 @@
+<launch>
+  <arg name="filepath" default="irospath3d.dvxl" />
+  <arg name="frame" default="/environment_link" />
+
+  <node pkg="astar_deform" type="visualizernode" name="visualizernode" output="screen">
+    <param name="filepath" type="string" value="$(arg filepath)" />
+    <param name="frame" type="string" value="$(arg frame)" />
+  </node>
+
+</launch>

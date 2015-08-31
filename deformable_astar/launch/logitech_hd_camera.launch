@@ -1,0 +1,12 @@
+<launch>
+  <arg name="device" default="/dev/video1" />
+  <arg name="height" default="1080" />
+  <arg name="width" default="1920" />
+
+  <node pkg="uvc_camera_driver" type="usb_cam_node" name="camera" output="screen">
+    <param name="video_device" type="string" value="$(arg device)" />
+    <param name="image_width" type="int" value="$(arg width)" />
+    <param name="image_height" type="int" value="$(arg height)" />
+  </node>
+
+</launch>

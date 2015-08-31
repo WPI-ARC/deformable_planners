@@ -1,0 +1,10 @@
+geometry_msgs/PoseStamped start
+geometry_msgs/PoseStamped goal
+int64 ctrl
+float64 scale
+float64 pareto_ctrl
+---
+PathState[] path
+float64 total_cost
+float64 total_deformation
+float64 total_distance

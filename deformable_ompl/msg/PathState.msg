@@ -1,0 +1,4 @@
+geometry_msgs/Vector3 position
+geometry_msgs/Quaternion orientation
+float64 deformation_cost
+float64 length_cost

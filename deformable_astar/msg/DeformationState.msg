@@ -1,0 +1,5 @@
+float64 deformation_raw
+float64 deformation_cost
+float64 distance_raw
+float64 distance_cost
+float64 heuristic

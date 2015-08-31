@@ -1,0 +1,5 @@
+bool reset_total_deformation
+---
+float64 current_visible_area
+float64 current_deformation
+float64 total_deformation

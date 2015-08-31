@@ -1,0 +1,9 @@
+How do we compute the goal state?
+
+cost-aware IK?
+- Often infinite solutions + non-linear cost fn
+
+
+If the computed goal state doesn't match the demonstration, paths are going to be pretty rough
+
+Can we "cheat" by matching the start and goal states of the demonstration?

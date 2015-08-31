@@ -1,0 +1,5 @@
+int64 reset
+---
+string status
+float64 deformation
+float64 total_deformation

@@ -1,0 +1,2 @@
+deformable_ompl/SimplePathState[] original_path
+float64 interval_size

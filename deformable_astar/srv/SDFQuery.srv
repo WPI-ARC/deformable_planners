@@ -1,0 +1,5 @@
+float64 px
+float64 py
+float64 rz
+---
+geometry_msgs/Vector3 gradient

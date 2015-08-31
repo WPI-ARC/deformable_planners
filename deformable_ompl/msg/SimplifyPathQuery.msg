@@ -1,0 +1,7 @@
+deformable_ompl/ObstacleConfig[] obstacles
+deformable_ompl/CollisionPlane[] collision_planes
+deformable_ompl/PathState[] original_path
+float64 probe_radius
+float64 max_shortcut_fraction
+uint32 max_iterations
+uint32 max_failed_iterations

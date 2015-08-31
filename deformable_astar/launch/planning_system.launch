@@ -1,0 +1,10 @@
+<launch>
+  <arg name="env_filepath" default="environment.dvxl" />
+  <arg name="robot_filepath" default="cubebot.dvxl" />
+
+  <node pkg="astar_deform" type="plannernode" name="plannernode" output="screen">
+    <param name="env_filepath" type="string" value="$(arg env_filepath)" />
+    <param name="robot_filepath" type="string" value="$(arg robot_filepath)" />
+  </node>
+
+</launch>

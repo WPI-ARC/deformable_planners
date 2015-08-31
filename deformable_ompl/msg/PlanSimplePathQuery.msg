@@ -1,0 +1,11 @@
+deformable_ompl/ObstacleConfig[] obstacles
+deformable_ompl/SimplePathState start
+deformable_ompl/SimplePathState goal
+float64 probe_radius
+float64 p
+float64 time_limit
+uint8 RRTSTAR=0
+uint8 TRRT=1
+uint8 FMTSTAR=2
+uint8 PRMSTAR=3
+uint8 planner_type

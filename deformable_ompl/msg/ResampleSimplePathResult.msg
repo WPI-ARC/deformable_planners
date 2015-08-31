@@ -1,0 +1,1 @@
+deformable_ompl/SimplePathState[] resampled_path

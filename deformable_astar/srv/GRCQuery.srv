@@ -1,0 +1,7 @@
+geometry_msgs/Vector3 current_ideal
+geometry_msgs/Vector3 current_state
+geometry_msgs/Vector3 current_target
+geometry_msgs/Vector3 next_target
+float64 grc_control
+---
+geometry_msgs/Vector3 corrected_target

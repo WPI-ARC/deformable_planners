@@ -1,0 +1,3 @@
+uint32 num_frames
+---
+float64 average_visible_area

@@ -1,0 +1,18 @@
+<launch>
+  <arg name="height" default="1080" />
+  <arg name="width" default="1920" />
+  <arg name="threshold" default="85" />
+
+  <node pkg="usb_cam" type="usb_cam_node" name="usb_cam" output="log">
+    <param name="image_width" type="int" value="$(arg width)" />
+    <param name="image_height" type="int" value="$(arg height)" />
+  </node>
+
+  <node pkg="astar_deform" type="camera_client.py" name="camera_client" output="screen" >
+    <param name="image_source" type="string" value="usb_cam/image_raw" />
+    <param name="image_width" type="int" value="$(arg width)" />
+    <param name="image_height" type="int" value="$(arg height)" />
+    <param name="threshold" type="int" value="$(arg threshold)" />
+  </node>
+
+</launch>

@@ -1,0 +1,27 @@
+<launch>
+
+  <arg name="root_frame" default="base_link" />
+  <arg name="target_frame" default="environment_link" />
+  <arg name="node_name" default="environment_broadcaster" />
+  <arg name="tx" default="0.25" />
+  <arg name="ty" default="0.0" />
+  <arg name="tz" default="1.12" />
+  <arg name="rx" default="0.0" />
+  <arg name="ry" default="0.0" />
+  <arg name="rz" default="0.0" />
+  <arg name="rw" default="1.0" />
+
+  <node pkg="generic_tf_broadcaster" type="generic_tf_broadcaster.py" name="$(arg node_name)" output="screen">
+    <param name="target_frame" type="string" value="$(arg target_frame)" />
+    <param name="root_frame" type="string" value="$(arg root_frame)" />
+    <param name="name" type="string" value="$(arg node_name)" />
+    <param name="tx" type="double" value="$(arg tx)" />
+    <param name="ty" type="double" value="$(arg ty)" />
+    <param name="tz" type="double" value="$(arg tz)" />
+    <param name="rx" type="double" value="$(arg rx)" />
+    <param name="ry" type="double" value="$(arg ry)" />
+    <param name="rz" type="double" value="$(arg rz)" />
+    <param name="rw" type="double" value="$(arg rw)" />
+  </node>
+
+</launch>

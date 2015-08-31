@@ -1,0 +1,7 @@
+deformable_ompl/ObstacleConfig[] obstacles
+float64 minimum_target_clearance
+float64 minimum_target_depth
+float64 maximum_target_depth
+uint32 maximum_target_checks
+uint32 first_object_id
+uint32 second_object_id

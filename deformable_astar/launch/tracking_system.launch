@@ -1,0 +1,184 @@
+<launch>
+
+  <arg name="remapped_tf" default="/tf" />
+  <arg name="output" default="screen" />
+  <arg name="launch_camera" default="true" />
+
+  <!-- CAMERA DRIVER -->
+  <include if="$(arg launch_camera)" file="$(find deformable_astar)/launch/tracking_camera.launch" >
+    <arg name="camera" value="/dev/video0" />
+  </include>
+
+  <!--CAMERA FRAMES (adjust transform by hand!)-->
+  <arg name="pi" value="3.14159265359" />
+  <arg name="pi/2" value="1.5707963267948966" />
+  <arg name="optical_rotate" value="0 0 0 -$(arg pi/2) 0 -$(arg pi/2)" />
+
+  <arg name="camera_x_offset" value="-0.198" />
+  <arg name="camera_y_offset" value="0.360" />
+  <arg name="camera_z_offset" value="0.9329" />
+
+  <!-- <arg name="camera_x_offset" value="-0.1131" />
+  <arg name="camera_y_offset" value="0.2720" />
+  <arg name="camera_z_offset" value="0.9329" /> -->
+
+  <arg name="camera_yaw_rotation" value="$(arg pi)" />
+  <arg name="camera_pitch_rotation" value="$(arg pi/2)" />
+  <arg name="camera_roll_rotation" value="0.0" />
+
+  <!-- <arg name="camera_yaw_rotation" value="$(arg pi)" />
+  <arg name="camera_pitch_rotation" value="1.55" />
+  <arg name="camera_roll_rotation" value="0.2" /> -->
+
+  <node pkg="tf" type="static_transform_publisher" name="test_camera_sensor_link" args="$(arg camera_x_offset) $(arg camera_y_offset) $(arg camera_z_offset) $(arg camera_yaw_rotation) $(arg camera_pitch_rotation) $(arg camera_roll_rotation) /test_base_frame /test_camera_sensor_frame 100" >
+    <remap from="/tf" to="$(arg remapped_tf)" />
+  </node>
+  <node pkg="tf" type="static_transform_publisher" name="test_camera_optical_link" args="$(arg optical_rotate) /test_camera_sensor_frame /test_camera_optical_frame 100" >
+    <remap from="/tf" to="$(arg remapped_tf)" />
+  </node>
+
+  <node pkg="deformable_astar" type="robot_marker_pub.py" name="robot_marker_pub" output="$(arg output)">
+  </node>
+
+  <!-- IMAGE PIPELINE -->
+  <arg name="resized_height" default="1080" /> <!-- 540" /> -->
+  <arg name="resized_width" default="1920" /> <!-- 960" /> -->
+
+  <node pkg="image_sdf" type="binary_image_generator" name="binary_image_generator" output="$(arg output)">
+    <param name="camera_base_topic" type="string" value="test_camera/image" />
+    <param name="masked_output_topic" type="string" value="test_camera/masked" />
+    <param name="binary_output_topic" type="string" value="test_camera/binary" />
+    <param name="checkerboard_center_topic" type="string" value="test_camera/centers" />
+    <param name="resized_width" type="int" value="$(arg resized_width)" />
+    <param name="resized_height" type="int" value="$(arg resized_height)" />
+  </node>
+
+  <node pkg="image_sdf" type="binary_image_lowpass_filter" name="binary_image_lowpass_filter" output="$(arg output)">
+    <param name="image_input_topic" type="string" value="test_camera/binary" />
+    <param name="filtered_output_topic" type="string" value="test_camera/binary_filtered" />
+    <param name="filter_depth" type="int" value="15" />
+  </node>
+
+  <node pkg="deformable_astar" type="cost_client.py" name="cost_client" output="$(arg output)">
+  </node>
+
+  <!-- Disabled since we've switched to the unified representation -->
+  <!-- <node pkg="image_sdf" type="image_sdf_node" name="image_sdf_generator" output="$(arg output)">
+    <param name="binary_base_topic" type="string" value="test_camera/binary_filtered" />
+    <param name="sdf_preview_topic" type="string" value="test_camera/sdf" />
+    <param name="sdf_raw_topic" type="string" value="test_camera/sdf_raw" />
+  </node> -->
+
+  <!-- ENVIRONMENT FRAMES -->
+
+  <!-- Transform between environment mocap marker and real environment origin -->
+  <!-- Old
+  <arg name="env_x_offset" value="-0.205" />
+  <arg name="env_y_offset" value="-0.29" />
+  <arg name="env_z_offset" value="-0.025" />
+  -->
+  <arg name="env_x_offset" value="-0.208" />
+  <arg name="env_y_offset" value="-0.287" />
+  <arg name="env_z_offset" value="-0.025" />
+
+  <node pkg="tf" type="static_transform_publisher" name="test_environment_link" args="$(arg env_x_offset) $(arg env_y_offset) $(arg env_z_offset) 0 0 0 /mocap/TestEnvironment/TestEnvironment /test_environment_frame 100" >
+    <remap from="/tf" to="$(arg remapped_tf)" />
+  </node>
+
+  <!-- Original chessboard locations (before they were moved to fix projection issue)
+  <node pkg="tf" type="static_transform_publisher" name="test_environment_marker_link" args="-0.201 -0.275 -0.025 0 0 0 /mocap/TestEnvironment/TestEnvironment /origin_marker_frame 100" >
+    <remap from="/tf" to="$(arg remapped_tf)" />
+  </node>
+
+  <node pkg="tf" type="static_transform_publisher" name="test_environment_UL_link" args="0.402 0.55 0.0 0 0 0 /origin_marker_frame /UL_marker_frame 100" >
+    <remap from="/tf" to="$(arg remapped_tf)" />
+  </node>
+
+  <node pkg="tf" type="static_transform_publisher" name="test_environment_UR_link" args="0.402 0.0 0.0 0 0 0 /origin_marker_frame /UR_marker_frame 100" >
+    <remap from="/tf" to="$(arg remapped_tf)" />
+  </node>
+
+  <node pkg="tf" type="static_transform_publisher" name="test_environment_LL_link" args="0.0 0.55 0.0 0 0 0 /origin_marker_frame /LL_marker_frame 100" >
+    <remap from="/tf" to="$(arg remapped_tf)" />
+  </node>
+
+  <node pkg="tf" type="static_transform_publisher" name="test_environment_LR_link" args="0.0 0.0 0.0 0 0 0 /origin_marker_frame /LR_marker_frame 100" >
+    <remap from="/tf" to="$(arg remapped_tf)" />
+  </node>
+  -->
+
+  <!-- After move, before hand tuning
+  <node pkg="tf" type="static_transform_publisher" name="test_environment_marker_link" args="0.052 0.014 0.0 0 0 0 /test_environment_frame /origin_marker_frame 100" >
+    <remap from="/tf" to="$(arg remapped_tf)" />
+  </node>
+
+  <node pkg="tf" type="static_transform_publisher" name="test_environment_LR_link" args="0.32 0.554 0.0 0 0 0 /origin_marker_frame /LR_marker_frame 100" >
+    <remap from="/tf" to="$(arg remapped_tf)" />
+  </node>
+
+  <node pkg="tf" type="static_transform_publisher" name="test_environment_LL_link" args="0.32 0.0 0.0 0 0 0 /origin_marker_frame /LL_marker_frame 100" >
+    <remap from="/tf" to="$(arg remapped_tf)" />
+  </node>
+
+  <node pkg="tf" type="static_transform_publisher" name="test_environment_UR_link" args="0.0 0.554 0.0 0 0 0 /origin_marker_frame /UR_marker_frame 100" >
+    <remap from="/tf" to="$(arg remapped_tf)" />
+  </node>
+
+  <node pkg="tf" type="static_transform_publisher" name="test_environment_UL_link" args="0.0 0.0 0.0 0 0 0 /origin_marker_frame /UL_marker_frame 100" >
+    <remap from="/tf" to="$(arg remapped_tf)" />
+  </node>
+  -->
+
+  <node pkg="tf" type="static_transform_publisher" name="test_environment_marker_link" args="0.052 0.008 0.0 0 0 0 /test_environment_frame /origin_marker_frame 100" >
+    <remap from="/tf" to="$(arg remapped_tf)" />
+  </node>
+
+  <node pkg="tf" type="static_transform_publisher" name="test_environment_LR_link" args="0.313 0.5555 0.0 0 0 0 /origin_marker_frame /LR_marker_frame 100" >
+    <remap from="/tf" to="$(arg remapped_tf)" />
+  </node>
+
+  <node pkg="tf" type="static_transform_publisher" name="test_environment_LL_link" args="0.314 0.001 0.0 0 0 0 /origin_marker_frame /LL_marker_frame 100" >
+    <remap from="/tf" to="$(arg remapped_tf)" />
+  </node>
+
+  <node pkg="tf" type="static_transform_publisher" name="test_environment_UR_link" args="0.002 0.555 0.0 0 0 0 /origin_marker_frame /UR_marker_frame 100" >
+    <remap from="/tf" to="$(arg remapped_tf)" />
+  </node>
+
+  <node pkg="tf" type="static_transform_publisher" name="test_environment_UL_link" args="0.0 0.0 0.0 0 0 0 /origin_marker_frame /UL_marker_frame 100" >
+    <remap from="/tf" to="$(arg remapped_tf)" />
+  </node>
+
+  <!-- Central markers to help reduce the effects of distortion -->
+  <node pkg="tf" type="static_transform_publisher" name="test_environment_C1_link" args="0.149 0.1955 0.0 0 0 0 /origin_marker_frame /C1_marker_frame 100" >
+    <remap from="/tf" to="$(arg remapped_tf)" />
+  </node>
+
+  <node pkg="tf" type="static_transform_publisher" name="test_environment_C2_link" args="0.149 0.367 0.0 0 0 0 /origin_marker_frame /C2_marker_frame 100" >
+    <remap from="/tf" to="$(arg remapped_tf)" />
+  </node>
+
+  <!-- Transform between the /mocap/ArchieRightHand/ArchieRightHand marker and the origin of the "robot" -->
+  <!-- OLD VERSION
+  <node pkg="tf" type="static_transform_publisher" name="robot_bracket_link_1" args="0.23 0.0 0.0 $(arg pi/2) 0 $(arg pi/2) /mocap_right_wrist /test_robot_frame_int 100" >
+    <remap from="/tf" to="$(arg remapped_tf)" />
+  </node>
+
+  <node pkg="tf" type="static_transform_publisher" name="robot_bracket_link_2" args="0.0 0.0 0.0 0.0872664626 0.0 0.0 /test_robot_frame_int /test_robot_frame 100" >
+    <remap from="/tf" to="$(arg remapped_tf)" />
+  </node>
+  -->
+  <node pkg="tf" type="static_transform_publisher" name="robot_bracket_link" args="-0.066 0.08 -0.04 0 0 -$(arg pi/2) /mocap/ArchieRightHand/ArchieRightHand /test_robot_bracket_frame 100" >
+    <remap from="/tf" to="$(arg remapped_tf)" />
+  </node>
+
+  <node pkg="tf" type="static_transform_publisher" name="robot_body_link" args="-0.0015 -0.006 0.02 0.05 0.0 0.0 /test_robot_bracket_frame /test_robot_frame 100" >
+    <remap from="/tf" to="$(arg remapped_tf)" />
+  </node>
+
+  <!-- Transform between the origin of the robot and the wrist of the robot (used to provide a "true" wrist pose -->
+  <node pkg="tf" type="static_transform_publisher" name="robot_wrist_link_1" args="0.0 0.0 -0.21 -$(arg pi/2) -$(arg pi/2) 0 /test_robot_bracket_frame /mocap_right_wrist 100" >
+    <remap from="/tf" to="$(arg remapped_tf)" />
+  </node>
+
+</launch>
