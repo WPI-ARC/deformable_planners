@@ -8,10 +8,6 @@
 #include <functional>
 #include <chrono>
 #include <random>
-#include <Eigen/Geometry>
-#include <visualization_msgs/Marker.h>
-#include "arc_utilities/voxel_grid.hpp"
-#include "deformable_ompl/DvxlGrid.h"
 
 #ifndef SIMPLE_RRT_PLANNER_HPP
 #define SIMPLE_RRT_PLANNER_HPP
@@ -115,6 +111,35 @@ namespace simple_rrt_planner
         }
     };
 
+    /* This is the simplest possible clas that provides all helper functions needed by the SimpleHybridRRTPlanner
+     *
+     * class DummyPlannerFns
+     * {
+     * public:
+     *
+     *     int64_t GetNearestNeighbor(const std::vector<SimpleRRTPlannerState<STATE_TYPE>>& planner_nodes, const STATE_TYPE& random_state)
+     *     {
+     *         return 0;
+     *     }
+     *
+     *     bool GoalReached(const STATE_TYPE& current_state, const STATE_TYPE& goal_state)
+     *     {
+     *         return false;
+     *     }
+     *
+     *     STATE_TYPE SampleRandomTarget()
+     *     {
+     *         STATE_TYPE rand_target;
+     *         return rand_target;
+     *     }
+     *
+     *     std::vector<STATE_TYPE> PropagateForwards(const STATE_TYPE& current_state, const STATE_TYPE& target_state)
+     *     {
+     *         return std::vector<STATE_TYPE>();
+     *     }
+     *   };
+    */
+
     template<typename T, typename Allocator=std::allocator<T>>
     class SimpleHybridRRTPlanner
     {
@@ -124,10 +149,8 @@ namespace simple_rrt_planner
 
     public:
 
-        std::pair<std::vector<T>, std::map<std::string, double>> Plan(const T& start, const T& goal, std::function<int64_t(const std::vector<SimpleRRTPlannerState<T, Allocator>>&, const T&)>& nearest_neighbor_fn, std::function<bool(const T&, const T&)>& goal_reached_fn, std::function<T(void)>& sampling_fn, std::function<std::vector<T>(const T&, const T&)>& forward_propagation_fn, std::mt19937_64& rng, const std::chrono::duration<double>& time_limit, const double goal_sampling_probability) const
+        std::pair<std::vector<T>, std::map<std::string, double>> Plan(const T& start, std::function<int64_t(const std::vector<SimpleRRTPlannerState<T, Allocator>>&, const T&)>& nearest_neighbor_fn, std::function<bool(const T&)>& goal_reached_fn, std::function<T(void)>& sampling_fn, std::function<std::vector<T>(const T&, const T&)>& forward_propagation_fn, const std::chrono::duration<double>& time_limit) const
         {
-            // Uniform distribution for goal biasing
-            std::uniform_real_distribution<double> goal_biasing_distribution(0.0, 1.0);
             // Keep track of time
             std::chrono::time_point<std::chrono::high_resolution_clock> start_time;
             std::chrono::time_point<std::chrono::high_resolution_clock> cur_time;
@@ -150,16 +173,7 @@ namespace simple_rrt_planner
             while (time_limit > (cur_time - start_time))
             {
                 // Sample a random goal
-                T random_target;
-                double sample_goal = goal_biasing_distribution(rng);
-                if (sample_goal < goal_sampling_probability)
-                {
-                    random_target = goal;
-                }
-                else
-                {
-                    random_target = sampling_fn();
-                }
+                T random_target = sampling_fn();
                 // Get the nearest neighbor
                 int64_t nearest_neighbor_index = nearest_neighbor_fn(nodes, random_target);
                 const T& nearest_neighbor = nodes.at(nearest_neighbor_index).GetValueImmutable();
@@ -174,7 +188,7 @@ namespace simple_rrt_planner
                     {
                         const T& current_propagated = propagated[idx];
                         // Check if we've reached the goal
-                        if (goal_reached_fn(current_propagated, goal))
+                        if (goal_reached_fn(current_propagated))
                         {
                             planned_path.push_back(current_propagated);
                             int64_t parent_index = node_parent_index;
@@ -188,7 +202,8 @@ namespace simple_rrt_planner
                             std::reverse(planned_path.begin(), planned_path.end());
                             // Update the statistics
                             cur_time = std::chrono::high_resolution_clock::now();
-                            statistics["planning_time"] = (cur_time - start_time).count();
+                            std::chrono::duration<double> planning_time(cur_time - start_time);
+                            statistics["planning_time"] = planning_time.count();
                             statistics["total_states"] = nodes.size();
                             statistics["solution_path_length"] = planned_path.size();
                             // Put together the results

@@ -20,7 +20,7 @@
 //typedef EigenHelpers::VectorVector3d nomdp_planner_state;
 typedef Eigen::Vector3d nomdp_planner_state;
 typedef std::function<int64_t(const std::vector<simple_rrt_planner::SimpleRRTPlannerState<nomdp_planner_state>>&, const nomdp_planner_state&)> nomdp_nearest_neighbor_fn;
-typedef std::function<bool(const nomdp_planner_state&, const nomdp_planner_state&)> nomdp_goal_reached_fn;
+typedef std::function<bool(const nomdp_planner_state&)> nomdp_goal_reached_fn;
 typedef std::function<nomdp_planner_state(void)> nomdp_sampling_fn;
 typedef std::function<std::vector<nomdp_planner_state>(const nomdp_planner_state&, const nomdp_planner_state&)> nomdp_propagation_fn;
 
@@ -28,7 +28,6 @@ class SimpleRRTHelpers
 {
 protected:
 
-    double goal_threshold_;
     double step_size_;
     std::mt19937_64 rng_;
     double min_x_;
@@ -40,9 +39,8 @@ protected:
 
 public:
 
-    SimpleRRTHelpers(const Eigen::Vector3d& min_bounds, const Eigen::Vector3d& max_bounds, const double goal_threshold, const double step_size, std::mt19937_64& rng) : rng_(rng)
+    SimpleRRTHelpers(const Eigen::Vector3d& min_bounds, const Eigen::Vector3d& max_bounds, const double step_size, std::mt19937_64& rng) : rng_(rng)
     {
-        goal_threshold_ = goal_threshold;
         step_size_ = step_size;
         min_x_ = min_bounds.x();
         min_y_ = min_bounds.y();
@@ -68,19 +66,6 @@ public:
             }
         }
         return min_index;
-    }
-
-    bool GoalReached(const nomdp_planner_state& current_state, const nomdp_planner_state& goal_state)
-    {
-        double distance = (current_state - goal_state).norm();
-        if (distance < goal_threshold_)
-        {
-            return true;
-        }
-        else
-        {
-            return false;
-        }
     }
 
     nomdp_planner_state SampleRandomTarget()
@@ -156,35 +141,7 @@ public:
     }
 };
 
-class DummyPlannerFns
-{
-protected:
 
-    ;
-
-public:
-
-    int64_t GetNearestNeighbor(const std::vector<simple_rrt_planner::SimpleRRTPlannerState<nomdp_planner_state>>& planner_nodes, const nomdp_planner_state& random_state)
-    {
-        return 0;
-    }
-
-    bool GoalReached(const nomdp_planner_state& current_state, const nomdp_planner_state& goal_state)
-    {
-        return false;
-    }
-
-    nomdp_planner_state SampleRandomTarget()
-    {
-        nomdp_planner_state rand_target;
-        return rand_target;
-    }
-
-    std::vector<nomdp_planner_state> PropagateForwards(const nomdp_planner_state& current_state, const nomdp_planner_state& target_state)
-    {
-        return std::vector<nomdp_planner_state>();
-    }
-};
 
 int main(int argc, char** argv)
 {
@@ -195,22 +152,30 @@ int main(int argc, char** argv)
     // Stuff
     unsigned long seed = std::chrono::system_clock::now().time_since_epoch().count();
     std::mt19937_64 prng(seed);
+    std::uniform_real_distribution<double> goal_sampling_distribution(0.0, 1.0);
     simple_rrt_planner::SimpleHybridRRTPlanner<nomdp_planner_state> planner;
     // Make the functions
-    //DummyPlannerFns planner_fn_class;
     double goal_bias = 0.05;
+    double goal_tolerance = 0.05;
+    double step_size = 0.05;
     nomdp_planner_state start_state(0.1, 0.1, 0.1);
     nomdp_planner_state goal_state(9.9, 9.9, 9.9);
     std::chrono::duration<double> time_limit(10.0);
     Eigen::Vector3d min_bounds(0.0, 0.0, 0.0);
     Eigen::Vector3d max_bounds(10.0, 10.0, 10.0);
-    SimpleRRTHelpers planner_fn_class(min_bounds, max_bounds, 0.05, 0.1, prng);
+    SimpleRRTHelpers planner_fn_class(min_bounds, max_bounds, step_size, prng);
     nomdp_nearest_neighbor_fn nearest_neighbor_fn = std::bind(&SimpleRRTHelpers::GetNearestNeighbor, &planner_fn_class, std::placeholders::_1, std::placeholders::_2);
-    nomdp_goal_reached_fn goal_reached_fn = std::bind(&SimpleRRTHelpers::GoalReached, &planner_fn_class, std::placeholders::_1, std::placeholders::_2);
-    nomdp_sampling_fn sampling_fn = std::bind(&SimpleRRTHelpers::SampleRandomTarget, &planner_fn_class);
+    nomdp_goal_reached_fn goal_reached_fn = [&](const nomdp_planner_state& current_state) { return ((current_state - goal_state).norm() < goal_tolerance); };
+
+
+
+    nomdp_sampling_fn state_sampling_fn = std::bind(&SimpleRRTHelpers::SampleRandomTarget, &planner_fn_class);
+    nomdp_sampling_fn sampling_fn = [&]() { return ((goal_sampling_distribution(prng) < goal_bias) ? state_sampling_fn() : goal_state); };
+
+
     nomdp_propagation_fn forward_propagation_fn = std::bind(&SimpleRRTHelpers::ConnectPropagateForwards, &planner_fn_class, std::placeholders::_1, std::placeholders::_2);
     // Plan
-    std::pair<std::vector<nomdp_planner_state>, std::map<std::string, double>> planner_result = planner.Plan(start_state, goal_state, nearest_neighbor_fn, goal_reached_fn, sampling_fn, forward_propagation_fn, prng, time_limit, goal_bias);
+    std::pair<std::vector<nomdp_planner_state>, std::map<std::string, double>> planner_result = planner.Plan(start_state, nearest_neighbor_fn, goal_reached_fn, sampling_fn, forward_propagation_fn, time_limit);
     std::cout << "Planner results: " << PrettyPrint::PrettyPrint(planner_result.second) << std::endl;
     std::cout << "Planned path:\n" << PrettyPrint::PrettyPrint(planner_result.first, false, "\n") << std::endl;
     return 0;
