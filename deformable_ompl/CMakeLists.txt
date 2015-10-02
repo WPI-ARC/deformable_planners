@@ -150,6 +150,16 @@ add_executable(${PROJECT_NAME}_simple_node
 add_dependencies(${PROJECT_NAME}_simple_node ${catkin_EXPORTED_TARGETS} ${PROJECT_NAME}_gencpp)
 target_link_libraries(${PROJECT_NAME}_simple_node ${catkin_LIBRARIES} ${OMPL_LIBRARIES} ${PROJECT_NAME} rt)
 
+add_executable(nomdp_contact_planning_node
+            include/${PROJECT_NAME}/simple_rrt_planner.hpp
+            include/${PROJECT_NAME}/simple_uncertainty_models.hpp
+            include/${PROJECT_NAME}/simple_pid_controller.hpp
+            src/${PROJECT_NAME}/simple_uncertainty_models.cpp
+            src/${PROJECT_NAME}/simple_pid_controller.cpp
+            src/nomdp_contact_planning_node.cpp)
+add_dependencies(nomdp_contact_planning_node ${catkin_EXPORTED_TARGETS} ${PROJECT_NAME}_gencpp)
+target_link_libraries(nomdp_contact_planning_node ${PROJECT_NAME} ${catkin_LIBRARIES} rt)
+
 #############
 ## Install ##
 #############
