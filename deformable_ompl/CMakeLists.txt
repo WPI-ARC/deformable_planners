@@ -151,7 +151,6 @@ add_dependencies(${PROJECT_NAME}_simple_node ${catkin_EXPORTED_TARGETS} ${PROJEC
 target_link_libraries(${PROJECT_NAME}_simple_node ${catkin_LIBRARIES} ${OMPL_LIBRARIES} ${PROJECT_NAME} rt)
 
 add_executable(nomdp_contact_planning_node
-            include/${PROJECT_NAME}/simple_rrt_planner.hpp
             include/${PROJECT_NAME}/simple_pid_controller.hpp
             include/${PROJECT_NAME}/simple_uncertainty_models.hpp
             include/${PROJECT_NAME}/nomdp_contact_planning.hpp

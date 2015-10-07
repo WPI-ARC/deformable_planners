@@ -22,28 +22,28 @@ dVoxelArray * g_robot;
 //Publish an environment to RVIZ
 void PublishDVXL(dVoxelArray * input, uint8_t threshold, float scale)
 {
-	//Create a new Marker
-	visualization_msgs::Marker marker; 
-	//ID and timestamp
+    //Create a new Marker
+    visualization_msgs::Marker marker;
+    //ID and timestamp
     marker.header.frame_id = "/environment_link";
-	marker.header.stamp = ros::Time::now();
-	//Give it a unique ID
-	marker.ns = "DVXL_Visualization";
-	marker.id = 0;
-	//Give the marker a type, in this case a SPHERE
-	marker.type = visualization_msgs::Marker::CUBE_LIST;
-	//We're going to add the marker to rviz
-	marker.action = visualization_msgs::Marker::ADD;
-	marker.pose.orientation.w = 1.0;
+    marker.header.stamp = ros::Time::now();
+    //Give it a unique ID
+    marker.ns = "DVXL_Visualization";
+    marker.id = 0;
+    //Give the marker a type, in this case a SPHERE
+    marker.type = visualization_msgs::Marker::CUBE_LIST;
+    //We're going to add the marker to rviz
+    marker.action = visualization_msgs::Marker::ADD;
+    marker.pose.orientation.w = 1.0;
     // Set the scale of the marker -- 1x1x1 here means 1m on a side
     marker.scale.x = scale;
     marker.scale.y = scale;
     marker.scale.z = scale;
     // Set the color -- be sure to set alpha to something non-zero!
     marker.color.a = 0.5;
-	//Set how long the marker should be around for
+    //Set how long the marker should be around for
     marker.lifetime = ros::Duration(10.0);
-	//For each element of the 3D grid
+    //For each element of the 3D grid
     for (int i = 0; i < input->xDim; i++)
     {
         for (int j = 0; j < input->yDim; j++)
@@ -72,8 +72,8 @@ void PublishDVXL(dVoxelArray * input, uint8_t threshold, float scale)
             }
         }
     }
-	//Publish the marker and hope for the best!
-	pub.publish(marker);
+    //Publish the marker and hope for the best!
+    pub.publish(marker);
 }
 
 float DistanceHeuristicHybrid3D(state6D * stateToEval, state6D * goalState, int debug_level)
@@ -370,7 +370,15 @@ std::vector<deformable_astar::PathState> ExportPlannedPath(StateList * planned_p
 bool Plan(deformable_astar::DeformPlanner::Request  &req, deformable_astar::DeformPlanner::Response &res)
 {
   ROS_INFO("Received a planning request...");
-  StateList * planned_path = NULL; //RunSearch(req.start, req.goal, req.ctrl, req.pareto_ctrl);
+  std::vector<float> req_start(3);
+  req_start[0] = req.start.pose.position.x;
+  req_start[1] = req.start.pose.position.y;
+  req_start[2] = req.start.pose.position.z;
+  std::vector<float> req_goal(3);
+  req_goal[0] = req.goal.pose.position.x;
+  req_goal[1] = req.goal.pose.position.y;
+  req_goal[2] = req.goal.pose.position.z;
+  StateList * planned_path = RunSearch(req_start, req_goal, req.ctrl, req.pareto_ctrl);
   res.path = ExportPlannedPath(planned_path, 0.005);
   ROS_INFO("Planning completed, returning result");
   return true;
@@ -380,7 +388,7 @@ int main (int argc, char** argv) {
     // Initialize ROS
     ros::init (argc, argv, "plannernode");
     ros::NodeHandle nh;
-    // Create a ROS publisher that can be used to send out the output 
+    // Create a ROS publisher that can be used to send out the output
     pub = nh.advertise<visualization_msgs::Marker>("Planning_Markers", 1);
     // Get the environment and robot files
     std::string basepath = "/home/calderpg/Dropbox/Research/planner3d/astar_deform/data/";

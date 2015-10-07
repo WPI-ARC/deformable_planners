@@ -5,6 +5,7 @@
 #include "deformable_astar/IrosPlanner.h"
 
 #define _USE_MATH_DEFINES
+#define UNUSED(x) (void)(x)
 
 int inCircle(float xc, float yc, float x, float y, float r)
 {
@@ -162,6 +163,7 @@ dVoxelArray * MakeTripleWallEnv(float env_cost, float env_deform)
 
 int InHole(int i, int j, int k, int hole_num)
 {
+    UNUSED(j);
     if (hole_num == 1)
     {
         if (i >= 10 && i < 20 && k >= 5 && k < 10)

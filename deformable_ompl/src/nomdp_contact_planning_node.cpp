@@ -13,7 +13,7 @@
 #include "arc_utilities/pretty_print.hpp"
 #include "arc_utilities/voxel_grid.hpp"
 #include "deformable_ompl/DvxlGrid.h"
-#include "deformable_ompl/simple_rrt_planner.hpp"
+#include "arc_utilities/simple_rrt_planner.hpp"
 #include "deformable_ompl/simple_pid_controller.hpp"
 #include "deformable_ompl/simple_uncertainty_models.hpp"
 
@@ -170,12 +170,17 @@ int main(int argc, char** argv)
 
 
     nomdp_sampling_fn state_sampling_fn = std::bind(&SimpleRRTHelpers::SampleRandomTarget, &planner_fn_class);
-    nomdp_sampling_fn sampling_fn = [&]() { return ((goal_sampling_distribution(prng) < goal_bias) ? state_sampling_fn() : goal_state); };
+    nomdp_sampling_fn sampling_fn = [&]() { return ((goal_sampling_distribution(prng) > goal_bias) ? state_sampling_fn() : goal_state); };
 
 
     nomdp_propagation_fn forward_propagation_fn = std::bind(&SimpleRRTHelpers::ConnectPropagateForwards, &planner_fn_class, std::placeholders::_1, std::placeholders::_2);
     // Plan
-    std::pair<std::vector<nomdp_planner_state>, std::map<std::string, double>> planner_result = planner.Plan(start_state, nearest_neighbor_fn, goal_reached_fn, sampling_fn, forward_propagation_fn, time_limit);
+    //std::pair<std::vector<nomdp_planner_state>, std::map<std::string, double>> planner_result = planner.Plan(start_state, nearest_neighbor_fn, goal_reached_fn, sampling_fn, forward_propagation_fn, time_limit);
+
+
+    std::pair<std::vector<nomdp_planner_state>, std::map<std::string, double>> planner_result = planner.Plan(start_state, goal_state, nearest_neighbor_fn, goal_reached_fn, state_sampling_fn, forward_propagation_fn, goal_bias, time_limit, prng);
+
+
     std::cout << "Planner results: " << PrettyPrint::PrettyPrint(planner_result.second) << std::endl;
     std::cout << "Planned path:\n" << PrettyPrint::PrettyPrint(planner_result.first, false, "\n") << std::endl;
     return 0;

@@ -5,9 +5,11 @@
 #include "deformable_astar/IrosPlanner.h"
 
 #define _USE_MATH_DEFINES
+#define UNUSED(x) (void)(x)
 
 int OldIrosTest(float Xstart, float Ystart, float Zstart, float Xgoal, float Ygoal, float Zgoal, int options, char * path_save)
 {
+    UNUSED(options);
     //File names - Not used
     //Load environment
     printf("Building a test environment...\n");
@@ -140,6 +142,7 @@ int AddCube(dVoxelArray * Environment, int Xs, int Ys, int Zs, int cube_dim, flo
 
 int IrosTest(int Xdim, int Ydim, int Zdim, float Xstart, float Ystart, float Zstart, float Xgoal, float Ygoal, float Zgoal, int options, char * path_save)
 {
+    UNUSED(options);
     //File names - Not used
     //Load environment
     printf("Building a test environment...\n");
@@ -578,6 +581,7 @@ dVoxelArray * MakeLowResTripleWallEnv(float env_cost, float env_deform)
 
 int InHole(int i, int j, int k, int hole_num)
 {
+    UNUSED(j);
     if (hole_num == 1)
     {
         if (i >= 10 && i < 20 && k >= 5 && k < 10)
@@ -608,6 +612,7 @@ int InHole(int i, int j, int k, int hole_num)
 
 int InLowResHole(int i, int j, int k, int hole_num)
 {
+    UNUSED(j);
     if (hole_num == 1)
     {
         if (i >= 6 && i < 12 && k >= 4 && k < 8)
@@ -924,6 +929,9 @@ dVoxelArray * MakeLowResLShape(float robot_cost, float robot_deform)
 
 int IrosSimulationTest(int Xdim, int Ydim, int Zdim, float Xstart, float Ystart, float Zstart, float Xgoal, float Ygoal, float Zgoal, int options, float pareto, char * path_save)
 {
+    UNUSED(Xdim);
+    UNUSED(Ydim);
+    UNUSED(Zdim);
     float solid_cost = 1.0;
     float soft_cost = 0.5;
     float solid_deform = 0.0;
@@ -998,6 +1006,9 @@ int IrosSimulationTest(int Xdim, int Ydim, int Zdim, float Xstart, float Ystart,
 
 int LowResIrosSimulationTest(int Xdim, int Ydim, int Zdim, float Xstart, float Ystart, float Zstart, float Xgoal, float Ygoal, float Zgoal, int options, float pareto, char * path_save)
 {
+    UNUSED(Xdim);
+    UNUSED(Ydim);
+    UNUSED(Zdim);
     float solid_cost = 1.0;
     float soft_cost = 0.5;
     float solid_deform = 0.0;
