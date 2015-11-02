@@ -111,7 +111,7 @@ catkin_package(INCLUDE_DIRS include LIBRARIES ${PROJECT_NAME} CATKIN_DEPENDS ros
 ## Build ##
 ###########
 
-set(CMAKE_CXX_FLAGS "-std=c++0x ${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS} -O3 -Wall -Wextra")
+set(CMAKE_CXX_FLAGS "-std=c++0x ${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS} -O0 -g -Wall -Wextra")
 
 message(STATUS "deformable_ompl CXX_FLAGS [ ${CMAKE_CXX_FLAGS} ]")
 
@@ -149,15 +149,6 @@ add_executable(${PROJECT_NAME}_simple_node
             src/deformable_ompl_simple_node.cpp)
 add_dependencies(${PROJECT_NAME}_simple_node ${catkin_EXPORTED_TARGETS} ${PROJECT_NAME}_gencpp)
 target_link_libraries(${PROJECT_NAME}_simple_node ${catkin_LIBRARIES} ${OMPL_LIBRARIES} ${PROJECT_NAME} rt)
-
-add_executable(nomdp_contact_planning_node
-            include/${PROJECT_NAME}/simple_pid_controller.hpp
-            include/${PROJECT_NAME}/simple_uncertainty_models.hpp
-            include/${PROJECT_NAME}/nomdp_contact_planning.hpp
-            src/${PROJECT_NAME}/nomdp_contact_planning.cpp
-            src/nomdp_contact_planning_node.cpp)
-add_dependencies(nomdp_contact_planning_node ${catkin_EXPORTED_TARGETS} ${PROJECT_NAME}_gencpp)
-target_link_libraries(nomdp_contact_planning_node ${PROJECT_NAME} ${catkin_LIBRARIES} rt)
 
 #############
 ## Install ##

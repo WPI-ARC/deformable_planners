@@ -9,7 +9,7 @@ find_package(catkin REQUIRED COMPONENTS arc_utilities roscpp rospy roslib geomet
 ## System dependencies are found with CMake's conventions
 # find_package(Boost REQUIRED COMPONENTS system)
 find_package(cmake_modules REQUIRED)
-find_package(OpenMP REQUIRED)
+find_package(OpenMP)
 find_package(Eigen REQUIRED)
 
 ## Uncomment this if the package has a setup.py. This macro ensures
@@ -73,7 +73,7 @@ catkin_package(
 
 ## Specify additional locations of header files
 ## Your package locations should be listed before other locations
-include_directories(include ${catkin_INCLUDE_DIRS} SYSTEM ${Eigen_INCLUDE_DIRS})
+include_directories(include SYSTEM ${catkin_INCLUDE_DIRS} ${Eigen_INCLUDE_DIRS})
 
 ## Set build flags
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS} -O3 -Wall -Wextra")
