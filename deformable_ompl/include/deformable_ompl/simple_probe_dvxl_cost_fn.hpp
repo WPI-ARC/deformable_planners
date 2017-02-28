@@ -22,12 +22,6 @@
 #define DVXL_RESOLUTION COST_DVXL_RESOLUTION
 #define PUNCTURE_DVXL_RESOLUTION 0.005
 
-#if OMPL_MAJOR_VERSION > 0
-    #define GET_OMPL_COST value()
-#else
-    #define GET_OMPL_COST v
-#endif
-
 #define ENV_X_SIZE 0.420
 #define ENV_Y_SIZE 0.593
 
@@ -53,14 +47,14 @@ namespace deformable_ompl
 
         DVXLGrid MakePunctureCheckEnvironment(const DVXLGrid&, const double puncture_check_resolution) const;
 
-        std::map<u_int32_t, std::unordered_map<VoxelGrid::GRID_INDEX, int8_t>> base_object_surfaces_;
+        std::map<uint32_t, std::unordered_map<VoxelGrid::GRID_INDEX, int8_t>> base_object_surfaces_;
 
-        mutable std::unordered_map<std::string, std::map<u_int32_t, std::unordered_map<VoxelGrid::GRID_INDEX, int8_t>>> state_surfaces_;
+        mutable std::unordered_map<std::string, std::map<uint32_t, std::unordered_map<VoxelGrid::GRID_INDEX, int8_t>>> state_surfaces_;
         mutable int64_t lookups_;
 
-        mutable u_int64_t state_invalid_;
-        mutable u_int64_t puncture_invalid_;
-        mutable u_int64_t fast_invalid_;
+        mutable uint64_t state_invalid_;
+        mutable uint64_t puncture_invalid_;
+        mutable uint64_t fast_invalid_;
 
     public:
 
@@ -110,9 +104,9 @@ namespace deformable_ompl
             disable_intermediate_puncture_check_ = enable;
         }
 
-        std::vector<u_int64_t> GetValidInvalidMovementCounts() const
+        std::vector<uint64_t> GetValidInvalidMovementCounts() const
         {
-            return std::vector<u_int64_t>({valid_, invalid_, state_invalid_, puncture_invalid_, fast_invalid_});
+            return std::vector<uint64_t>({valid_, invalid_, state_invalid_, puncture_invalid_, fast_invalid_});
         }
 
         // Invalid states have NAN cost
@@ -169,7 +163,7 @@ namespace deformable_ompl
             {
                 std::cerr << "Computed DVXL cost for validity check - " << dvxl_cost << std::endl;
             }
-            if (isnan(dvxl_cost))
+            if (std::isnan(dvxl_cost))
             {
                 return false;
             }
@@ -208,7 +202,7 @@ namespace deformable_ompl
             {
                 std::cerr << "Computed DVXL cost - " << dvxl_cost << std::endl;
             }
-            if (isnan(dvxl_cost))
+            if (std::isnan(dvxl_cost))
             {
                 return ompl::base::Cost(INFINITY);
             }
@@ -313,8 +307,8 @@ namespace deformable_ompl
             }
             // Get the start state surface cells
             // We know this is puncture free
-            std::map<u_int32_t, std::unordered_map<VoxelGrid::GRID_INDEX, int8_t>> working_surfaces = GetSurfaces(s1);
-            const std::map<u_int32_t, std::unordered_map<VoxelGrid::GRID_INDEX, int8_t>> starting_surfaces = working_surfaces;
+            std::map<uint32_t, std::unordered_map<VoxelGrid::GRID_INDEX, int8_t>> working_surfaces = GetSurfaces(s1);
+            const std::map<uint32_t, std::unordered_map<VoxelGrid::GRID_INDEX, int8_t>> starting_surfaces = working_surfaces;
             // Loop through the intermediate states
             ompl::base::State* intermediate_state = space_info_->allocState();
             for (unsigned int idx = 1; idx <= num_segments; idx++)
@@ -376,13 +370,13 @@ namespace deformable_ompl
             return valid;
         }
 
-        bool CheckForTopologyChanges(const std::map<u_int32_t, std::pair<int32_t, int32_t>>& original_topology, const std::map<u_int32_t, std::pair<int32_t, int32_t>>& new_topology) const
+        bool CheckForTopologyChanges(const std::map<uint32_t, std::pair<int32_t, int32_t>>& original_topology, const std::map<uint32_t, std::pair<int32_t, int32_t>>& new_topology) const
         {
             // Count the number of components, holes, and voids
             int32_t num_original_components = 0;
             int32_t num_original_holes = 0;
             int32_t num_original_voids = 0;
-            std::map<u_int32_t, std::pair<int32_t, int32_t>>::const_iterator original_topology_itr;
+            std::map<uint32_t, std::pair<int32_t, int32_t>>::const_iterator original_topology_itr;
             for (original_topology_itr = original_topology.begin(); original_topology_itr != original_topology.end(); ++original_topology_itr)
             {
                 num_original_components++;
@@ -392,7 +386,7 @@ namespace deformable_ompl
             int32_t num_new_components = 0;
             int32_t num_new_holes = 0;
             int32_t num_new_voids = 0;
-            std::map<u_int32_t, std::pair<int32_t, int32_t>>::const_iterator new_topology_itr;
+            std::map<uint32_t, std::pair<int32_t, int32_t>>::const_iterator new_topology_itr;
             for (new_topology_itr = new_topology.begin(); new_topology_itr != new_topology.end(); ++new_topology_itr)
             {
                 num_new_components++;
@@ -447,7 +441,7 @@ namespace deformable_ompl
         bool IncrementalCheckFinalPath(const std::vector<deformable_ompl::SimplePathState>& path, ros::Publisher& display_pub) const
         {
             // Get the initial object surfaces
-            std::map<u_int32_t, std::unordered_map<VoxelGrid::GRID_INDEX, int8_t>> object_surfaces = base_object_surfaces_;
+            std::map<uint32_t, std::unordered_map<VoxelGrid::GRID_INDEX, int8_t>> object_surfaces = base_object_surfaces_;
             // Loop through the path and update the surfaces
             for (size_t idx = 0; idx < path.size(); idx++)
             {
@@ -509,9 +503,9 @@ namespace deformable_ompl
             return path_dvxl_cost;
         }
 
-        std::map<u_int32_t, std::unordered_map<VoxelGrid::GRID_INDEX, int8_t>> GetSurfaces(const ompl::base::State* state) const
+        std::map<uint32_t, std::unordered_map<VoxelGrid::GRID_INDEX, int8_t>> GetSurfaces(const ompl::base::State* state) const
         {
-            std::unordered_map<std::string, std::map<u_int32_t, std::unordered_map<VoxelGrid::GRID_INDEX, int8_t>>>::const_iterator found_surfaces = state_surfaces_.find(state->as<deformable_ompl::SimpleProbeStateSpace::StateType>()->getKey());
+            std::unordered_map<std::string, std::map<uint32_t, std::unordered_map<VoxelGrid::GRID_INDEX, int8_t>>>::const_iterator found_surfaces = state_surfaces_.find(state->as<deformable_ompl::SimpleProbeStateSpace::StateType>()->getKey());
             // If not found, return a copy of the base object surfaces
             if (found_surfaces == state_surfaces_.end())
             {
@@ -523,7 +517,7 @@ namespace deformable_ompl
             }
         }
 
-        void StoreSurfaces(const ompl::base::State* state, std::map<u_int32_t, std::unordered_map<VoxelGrid::GRID_INDEX, int8_t>>& surfaces) const
+        void StoreSurfaces(const ompl::base::State* state, std::map<uint32_t, std::unordered_map<VoxelGrid::GRID_INDEX, int8_t>>& surfaces) const
         {
             state_surfaces_[state->as<deformable_ompl::SimpleProbeStateSpace::StateType>()->getKey()] = surfaces;
         }

@@ -18,15 +18,15 @@ DVXLCostFn::DVXLCostFn(std::string environment_filepath)
     bool loaded = environment_.LoadFromFile(environment_filepath);
     if (loaded)
     {
-        std::vector<u_int32_t> all_objects;
+        std::vector<uint32_t> all_objects;
         std::pair<sdf_tools::SignedDistanceField, sdf_tools::CollisionMapGrid> grids = UpdateInternalGrids(environment_, all_objects);
         sdf_ = grids.first;
         collision_map_ = grids.second;
         // Make an SDF for each object
-        std::vector<u_int32_t> object_ids = GetAllObjectIDs(environment_);
+        std::vector<uint32_t> object_ids = GetAllObjectIDs(environment_);
         for (size_t idx = 0; idx < object_ids.size(); idx++)
         {
-            std::vector<u_int32_t> current_object{object_ids[idx]};
+            std::vector<uint32_t> current_object{object_ids[idx]};
             sdf_tools::SignedDistanceField object_sdf = UpdateInternalGrids(environment_, current_object).first;
             object_sdfs_[object_ids[idx]] = object_sdf;
         }
@@ -41,31 +41,31 @@ DVXLCostFn::DVXLCostFn(std::string environment_filepath)
 DVXLCostFn::DVXLCostFn(DVXLGrid environment)
 {
     environment_ = environment;
-    std::vector<u_int32_t> all_objects;
+    std::vector<uint32_t> all_objects;
     std::pair<sdf_tools::SignedDistanceField, sdf_tools::CollisionMapGrid> grids = UpdateInternalGrids(environment_, all_objects);
     sdf_ = grids.first;
     collision_map_ = grids.second;
     // Make an SDF for each object
-    std::vector<u_int32_t> object_ids = GetAllObjectIDs(environment_);
+    std::vector<uint32_t> object_ids = GetAllObjectIDs(environment_);
     for (size_t idx = 0; idx < object_ids.size(); idx++)
     {
-        std::vector<u_int32_t> current_object{object_ids[idx]};
+        std::vector<uint32_t> current_object{object_ids[idx]};
         sdf_tools::SignedDistanceField object_sdf = UpdateInternalGrids(environment_, current_object).first;
         object_sdfs_[object_ids[idx]] = object_sdf;
     }
     initialized_ = true;
 }
 
-std::vector<u_int32_t> DVXLCostFn::GetAllObjectIDs(const DVXLGrid& environment)
+std::vector<uint32_t> DVXLCostFn::GetAllObjectIDs(const DVXLGrid& environment)
 {
-    std::map<u_int32_t, u_int8_t> object_ids;
+    std::map<uint32_t, uint8_t> object_ids;
     for (int64_t x_idx = 0; x_idx < environment.GetNumXCells(); x_idx++)
     {
         for (int64_t y_idx = 0; y_idx < environment.GetNumYCells(); y_idx++)
         {
             for (int64_t z_idx = 0; z_idx < environment.GetNumZCells(); z_idx++)
             {
-                u_int32_t object_id = environment.GetImmutable(x_idx, y_idx, z_idx).first.object_id;
+                uint32_t object_id = environment.GetImmutable(x_idx, y_idx, z_idx).first.object_id;
                 if (object_id > 0)
                 {
                     object_ids[object_id] = 1;
@@ -73,12 +73,12 @@ std::vector<u_int32_t> DVXLCostFn::GetAllObjectIDs(const DVXLGrid& environment)
             }
         }
     }
-    std::vector<u_int32_t> all_object_ids;
-    std::map<u_int32_t, u_int8_t>::const_iterator object_ids_itr;
+    std::vector<uint32_t> all_object_ids;
+    std::map<uint32_t, uint8_t>::const_iterator object_ids_itr;
     for (object_ids_itr = object_ids.begin(); object_ids_itr != object_ids.end(); ++object_ids_itr)
     {
-        u_int32_t object_id = object_ids_itr->first;
-        u_int8_t val = object_ids_itr->second;
+        uint32_t object_id = object_ids_itr->first;
+        uint8_t val = object_ids_itr->second;
         if (val > 0)
         {
             all_object_ids.push_back(object_id);
@@ -87,16 +87,16 @@ std::vector<u_int32_t> DVXLCostFn::GetAllObjectIDs(const DVXLGrid& environment)
     return all_object_ids;
 }
 
-std::vector<Eigen::Vector3d> DVXLCostFn::ExtractMinimumVoronoiPoints(const u_int32_t first_object_id, const u_int32_t second_object_id) const
+std::vector<Eigen::Vector3d> DVXLCostFn::ExtractMinimumVoronoiPoints(const uint32_t first_object_id, const uint32_t second_object_id) const
 {
     // First, make sure both objects are present
-    std::map<u_int32_t, sdf_tools::SignedDistanceField>::const_iterator found_first_object_sdf = object_sdfs_.find(first_object_id);
+    std::map<uint32_t, sdf_tools::SignedDistanceField>::const_iterator found_first_object_sdf = object_sdfs_.find(first_object_id);
     if (found_first_object_sdf == object_sdfs_.end())
     {
         std::cerr << "First object is not in the environment" << std::endl;
         return std::vector<Eigen::Vector3d>();
     }
-    std::map<u_int32_t, sdf_tools::SignedDistanceField>::const_iterator found_second_object_sdf = object_sdfs_.find(second_object_id);
+    std::map<uint32_t, sdf_tools::SignedDistanceField>::const_iterator found_second_object_sdf = object_sdfs_.find(second_object_id);
     if (found_second_object_sdf == object_sdfs_.end())
     {
         std::cerr << "Second object is not in the environment" << std::endl;
@@ -458,10 +458,10 @@ double DVXLCostFn::ComputeIntersectionCost(const std::vector<std::pair<Eigen::Ve
     return total_intersection_cost;
 }
 
-std::map<u_int32_t, std::vector<COLLISION_INFO>> DVXLCostFn::GetCollisionInfo(const std::vector<std::pair<Eigen::Vector3d, DVXL>>& points) const
+std::map<uint32_t, std::vector<COLLISION_INFO>> DVXLCostFn::GetCollisionInfo(const std::vector<std::pair<Eigen::Vector3d, DVXL>>& points) const
 {
     // Get the collision info for each point
-    std::map<u_int32_t, std::vector<COLLISION_INFO>> collision_information;
+    std::map<uint32_t, std::vector<COLLISION_INFO>> collision_information;
     for (size_t idx = 0; idx < points.size(); idx++)
     {
         const Eigen::Vector3d& point_location = points[idx].first;
@@ -484,10 +484,10 @@ std::map<u_int32_t, std::vector<COLLISION_INFO>> DVXLCostFn::GetCollisionInfo(co
     return collision_information;
 }
 
-std::map<u_int32_t, std::vector<COLLISION_INFO>> DVXLCostFn::GetCollisionInfo(const std::vector<std::pair<Eigen::Vector3d, DVXL>>& points, const Eigen::Affine3d base_transform) const
+std::map<uint32_t, std::vector<COLLISION_INFO>> DVXLCostFn::GetCollisionInfo(const std::vector<std::pair<Eigen::Vector3d, DVXL>>& points, const Eigen::Affine3d base_transform) const
 {
     // Get the collision info for each point
-    std::map<u_int32_t, std::vector<COLLISION_INFO>> collision_information;
+    std::map<uint32_t, std::vector<COLLISION_INFO>> collision_information;
     for (size_t idx = 0; idx < points.size(); idx++)
     {
         Eigen::Vector3d point_location = base_transform * points[idx].first;
@@ -510,10 +510,10 @@ std::map<u_int32_t, std::vector<COLLISION_INFO>> DVXLCostFn::GetCollisionInfo(co
     return collision_information;
 }
 
-std::map<u_int32_t, std::vector<COLLISION_INFO>> DVXLCostFn::GetCollisionInfo(const DVXLGrid& other_grid) const
+std::map<uint32_t, std::vector<COLLISION_INFO>> DVXLCostFn::GetCollisionInfo(const DVXLGrid& other_grid) const
 {
     // Get the collision info for each point
-    std::map<u_int32_t, std::vector<COLLISION_INFO>> collision_information;
+    std::map<uint32_t, std::vector<COLLISION_INFO>> collision_information;
     for (int64_t x_index = 0; x_index < other_grid.GetNumXCells(); x_index++)
     {
         for (int64_t y_index = 0; y_index < other_grid.GetNumYCells(); y_index++)
@@ -541,10 +541,10 @@ std::map<u_int32_t, std::vector<COLLISION_INFO>> DVXLCostFn::GetCollisionInfo(co
     return collision_information;
 }
 
-std::map<u_int32_t, std::vector<COLLISION_INFO>> DVXLCostFn::GetCollisionInfo(const DVXLGrid& other_grid, const Eigen::Affine3d base_transform) const
+std::map<uint32_t, std::vector<COLLISION_INFO>> DVXLCostFn::GetCollisionInfo(const DVXLGrid& other_grid, const Eigen::Affine3d base_transform) const
 {
     // Get the collision info for each point
-    std::map<u_int32_t, std::vector<COLLISION_INFO>> collision_information;
+    std::map<uint32_t, std::vector<COLLISION_INFO>> collision_information;
     for (int64_t x_index = 0; x_index < other_grid.GetNumXCells(); x_index++)
     {
         for (int64_t y_index = 0; y_index < other_grid.GetNumYCells(); y_index++)
@@ -575,10 +575,10 @@ std::map<u_int32_t, std::vector<COLLISION_INFO>> DVXLCostFn::GetCollisionInfo(co
     return collision_information;
 }
 
-std::pair<sdf_tools::SignedDistanceField, sdf_tools::CollisionMapGrid> DVXLCostFn::UpdateInternalGrids(DVXLGrid& environment, std::vector<u_int32_t>& objects_to_use)
+std::pair<sdf_tools::SignedDistanceField, sdf_tools::CollisionMapGrid> DVXLCostFn::UpdateInternalGrids(DVXLGrid& environment, std::vector<uint32_t>& objects_to_use)
 {
     // Put the objects in a map for quick checking
-    std::map<u_int32_t, u_int8_t> object_map;
+    std::map<uint32_t, uint8_t> object_map;
     for (size_t idx = 0; idx < objects_to_use.size(); idx++)
     {
         object_map[objects_to_use[idx]] = 1;
@@ -792,7 +792,7 @@ DVXLCostFn::DistanceField DVXLCostFn::BuildDistanceField(std::vector<VoxelGrid::
     return distance_field;
 }
 
-void DVXLCostFn::UpdateSurfacesWithIntersectingPoints(const DVXLGrid& other_grid, std::map<u_int32_t, std::unordered_map<VoxelGrid::GRID_INDEX, int8_t>>& surfaces, const bool verbose) const
+void DVXLCostFn::UpdateSurfacesWithIntersectingPoints(const DVXLGrid& other_grid, std::map<uint32_t, std::unordered_map<VoxelGrid::GRID_INDEX, int8_t>>& surfaces, const bool verbose) const
 {
     size_t removed = 0;
     size_t added = 0;
@@ -891,7 +891,7 @@ void DVXLCostFn::UpdateSurfacesWithIntersectingPoints(const DVXLGrid& other_grid
     }
 }
 
-void DVXLCostFn::UpdateSurfacesWithIntersectingPoints(const DVXLGrid& other_grid, const Eigen::Affine3d base_transform, std::map<u_int32_t, std::unordered_map<VoxelGrid::GRID_INDEX, int8_t>>& surfaces, const bool verbose) const
+void DVXLCostFn::UpdateSurfacesWithIntersectingPoints(const DVXLGrid& other_grid, const Eigen::Affine3d base_transform, std::map<uint32_t, std::unordered_map<VoxelGrid::GRID_INDEX, int8_t>>& surfaces, const bool verbose) const
 {
     size_t removed = 0;
     size_t added = 0;
@@ -993,7 +993,7 @@ void DVXLCostFn::UpdateSurfacesWithIntersectingPoints(const DVXLGrid& other_grid
     }
 }
 
-void DVXLCostFn::UpdateSurfacesWithIntersectingPoints(const std::vector<std::pair<Eigen::Vector3d, DVXL>>& points, std::map<u_int32_t, std::unordered_map<VoxelGrid::GRID_INDEX, int8_t>>& surfaces, const bool verbose) const
+void DVXLCostFn::UpdateSurfacesWithIntersectingPoints(const std::vector<std::pair<Eigen::Vector3d, DVXL>>& points, std::map<uint32_t, std::unordered_map<VoxelGrid::GRID_INDEX, int8_t>>& surfaces, const bool verbose) const
 {
     size_t removed = 0;
     size_t added = 0;
@@ -1086,7 +1086,7 @@ void DVXLCostFn::UpdateSurfacesWithIntersectingPoints(const std::vector<std::pai
     }
 }
 
-void DVXLCostFn::UpdateSurfacesWithIntersectingPoints(const std::vector<std::pair<Eigen::Vector3d, DVXL>>& points, const Eigen::Affine3d base_transform, std::map<u_int32_t, std::unordered_map<VoxelGrid::GRID_INDEX, int8_t>>& surfaces, const bool verbose) const
+void DVXLCostFn::UpdateSurfacesWithIntersectingPoints(const std::vector<std::pair<Eigen::Vector3d, DVXL>>& points, const Eigen::Affine3d base_transform, std::map<uint32_t, std::unordered_map<VoxelGrid::GRID_INDEX, int8_t>>& surfaces, const bool verbose) const
 {
     size_t removed = 0;
     size_t added = 0;
@@ -1179,13 +1179,13 @@ void DVXLCostFn::UpdateSurfacesWithIntersectingPoints(const std::vector<std::pai
     }
 }
 
-bool DVXLCostFn::CheckForPuncture(std::map<u_int32_t, std::unordered_map<VoxelGrid::GRID_INDEX, int8_t>>& object_surfaces, const bool verbose) const
+bool DVXLCostFn::CheckForPuncture(std::map<uint32_t, std::unordered_map<VoxelGrid::GRID_INDEX, int8_t>>& object_surfaces, const bool verbose) const
 {
     // Compute the number of holes in each surface
-    std::map<u_int32_t, std::unordered_map<VoxelGrid::GRID_INDEX, int8_t>>::iterator object_surfaces_itr;
+    std::map<uint32_t, std::unordered_map<VoxelGrid::GRID_INDEX, int8_t>>::iterator object_surfaces_itr;
     for (object_surfaces_itr = object_surfaces.begin(); object_surfaces_itr != object_surfaces.end(); ++object_surfaces_itr)
     {
-        u_int32_t object_number = object_surfaces_itr->first;
+        uint32_t object_number = object_surfaces_itr->first;
         std::unordered_map<VoxelGrid::GRID_INDEX, int8_t>& component_surface = object_surfaces_itr->second;
         std::pair<int32_t, int32_t> number_of_holes_and_voids = environment_.ComputeHolesInSurface(object_number, component_surface, verbose);
         int32_t number_of_holes = number_of_holes_and_voids.first;
@@ -1198,17 +1198,17 @@ bool DVXLCostFn::CheckForPuncture(std::map<u_int32_t, std::unordered_map<VoxelGr
     return false;
 }
 
-bool DVXLCostFn::CheckForPuncture(std::map<u_int32_t, std::unordered_map<VoxelGrid::GRID_INDEX, int8_t>>& current_object_surfaces, const std::map<u_int32_t, std::unordered_map<VoxelGrid::GRID_INDEX, int8_t>>& old_object_surfaces, const bool verbose) const
+bool DVXLCostFn::CheckForPuncture(std::map<uint32_t, std::unordered_map<VoxelGrid::GRID_INDEX, int8_t>>& current_object_surfaces, const std::map<uint32_t, std::unordered_map<VoxelGrid::GRID_INDEX, int8_t>>& old_object_surfaces, const bool verbose) const
 {
     // Compute the number of holes in each surface
     // Check the current surfaces against the old surfaces and ignore unchanged surfaces
-    std::map<u_int32_t, std::unordered_map<VoxelGrid::GRID_INDEX, int8_t>>::iterator object_surfaces_itr;
+    std::map<uint32_t, std::unordered_map<VoxelGrid::GRID_INDEX, int8_t>>::iterator object_surfaces_itr;
     for (object_surfaces_itr = current_object_surfaces.begin(); object_surfaces_itr != current_object_surfaces.end(); ++object_surfaces_itr)
     {
-        u_int32_t object_number = object_surfaces_itr->first;
+        uint32_t object_number = object_surfaces_itr->first;
         std::unordered_map<VoxelGrid::GRID_INDEX, int8_t>& component_surface = object_surfaces_itr->second;
         // Get the old surfaces
-        std::map<u_int32_t, std::unordered_map<VoxelGrid::GRID_INDEX, int8_t>>::const_iterator old_surface_query = old_object_surfaces.find(object_number);
+        std::map<uint32_t, std::unordered_map<VoxelGrid::GRID_INDEX, int8_t>>::const_iterator old_surface_query = old_object_surfaces.find(object_number);
         // Check if the current object isn't in the old surfaces - this means we check the surface
         if (old_surface_query == old_object_surfaces.end())
         {

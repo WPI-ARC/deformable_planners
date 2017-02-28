@@ -1434,7 +1434,7 @@ void ComputeStateOverlap(float xt, float yt, float zr, std::string environment, 
     }
     else
     {
-        std::map<float, u_int32_t> overlap = EvaluateStateOverlap(State, 3);
+        std::map<float, uint32_t> overlap = EvaluateStateOverlap(State, 3);
         std::cout << "OVERLAP: " << PrettyPrint::PrettyPrint(overlap, true) << std::endl;
     }
 }

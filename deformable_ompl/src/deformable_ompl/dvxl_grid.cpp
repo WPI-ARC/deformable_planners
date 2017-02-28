@@ -37,8 +37,8 @@ bool DVXLGrid::SaveToFile(std::string& filepath)
     try
     {
         std::ofstream output_file(filepath.c_str(), std::ios::out|std::ios::binary);
-        u_int32_t serialized_size = ros::serialization::serializationLength(message_rep);
-        std::unique_ptr<u_int8_t> ser_buffer(new u_int8_t[serialized_size]);
+        uint32_t serialized_size = ros::serialization::serializationLength(message_rep);
+        std::unique_ptr<uint8_t> ser_buffer(new uint8_t[serialized_size]);
         ros::serialization::OStream ser_stream(ser_buffer.get(), serialized_size);
         ros::serialization::serialize(ser_stream, message_rep);
         output_file.write((char*)ser_buffer.get(), serialized_size);
@@ -61,8 +61,8 @@ bool DVXLGrid::LoadFromFile(std::string& filepath)
         std::streampos end = input_file.tellg();
         input_file.seekg(0, std::ios::beg);
         std::streampos begin = input_file.tellg();
-        u_int32_t serialized_size = end - begin;
-        std::unique_ptr<u_int8_t> deser_buffer(new u_int8_t[serialized_size]);
+        uint32_t serialized_size = end - begin;
+        std::unique_ptr<uint8_t> deser_buffer(new uint8_t[serialized_size]);
         input_file.read((char*) deser_buffer.get(), serialized_size);
         ros::serialization::IStream deser_stream(deser_buffer.get(), serialized_size);
         DvxlGrid new_message;
@@ -77,13 +77,13 @@ bool DVXLGrid::LoadFromFile(std::string& filepath)
     }
 }
 
-std::vector<u_int8_t> DVXLGrid::PackBinaryRepresentation(const std::vector<DVXL>& raw) const
+std::vector<uint8_t> DVXLGrid::PackBinaryRepresentation(const std::vector<DVXL>& raw) const
 {
-    std::vector<u_int8_t> packed(raw.size() * 32);
+    std::vector<uint8_t> packed(raw.size() * 32);
     for (size_t field_idx = 0, binary_index = 0; field_idx < raw.size(); field_idx++, binary_index+=32)
     {
         const DVXL& raw_cell = raw[field_idx];
-        std::vector<u_int8_t> packed_cell = DVXLToBinary(raw_cell);
+        std::vector<uint8_t> packed_cell = DVXLToBinary(raw_cell);
         packed[binary_index + 0] = packed_cell[0];
         packed[binary_index + 1] = packed_cell[1];
         packed[binary_index + 2] = packed_cell[2];
@@ -120,18 +120,18 @@ std::vector<u_int8_t> DVXLGrid::PackBinaryRepresentation(const std::vector<DVXL>
     return packed;
 }
 
-std::vector<DVXL> DVXLGrid::UnpackBinaryRepresentation(std::vector<u_int8_t>& packed)
+std::vector<DVXL> DVXLGrid::UnpackBinaryRepresentation(std::vector<uint8_t>& packed)
 {
     if ((packed.size() % 32) != 0)
     {
         std::cerr << "Invalid binary representation - length is not a multiple of 32" << std::endl;
         return std::vector<DVXL>();
     }
-    u_int64_t data_size = packed.size() / 32;
+    uint64_t data_size = packed.size() / 32;
     std::vector<DVXL> unpacked(data_size);
     for (size_t field_idx = 0, binary_index = 0; field_idx < unpacked.size(); field_idx++, binary_index+=32)
     {
-        std::vector<u_int8_t> binary_block{packed[binary_index], packed[binary_index + 1], packed[binary_index + 2], packed[binary_index + 3], packed[binary_index + 4], packed[binary_index + 5], packed[binary_index + 6], packed[binary_index + 7], packed[binary_index + 8], packed[binary_index + 9], packed[binary_index + 10], packed[binary_index + 11], packed[binary_index + 12], packed[binary_index + 13], packed[binary_index + 14], packed[binary_index + 15], packed[binary_index + 16], packed[binary_index + 17], packed[binary_index + 18], packed[binary_index + 19], packed[binary_index + 20], packed[binary_index + 21], packed[binary_index + 22], packed[binary_index + 23], packed[binary_index + 24], packed[binary_index + 25], packed[binary_index + 26], packed[binary_index + 27], packed[binary_index + 28], packed[binary_index + 29], packed[binary_index + 30], packed[binary_index + 31]};
+        std::vector<uint8_t> binary_block{packed[binary_index], packed[binary_index + 1], packed[binary_index + 2], packed[binary_index + 3], packed[binary_index + 4], packed[binary_index + 5], packed[binary_index + 6], packed[binary_index + 7], packed[binary_index + 8], packed[binary_index + 9], packed[binary_index + 10], packed[binary_index + 11], packed[binary_index + 12], packed[binary_index + 13], packed[binary_index + 14], packed[binary_index + 15], packed[binary_index + 16], packed[binary_index + 17], packed[binary_index + 18], packed[binary_index + 19], packed[binary_index + 20], packed[binary_index + 21], packed[binary_index + 22], packed[binary_index + 23], packed[binary_index + 24], packed[binary_index + 25], packed[binary_index + 26], packed[binary_index + 27], packed[binary_index + 28], packed[binary_index + 29], packed[binary_index + 30], packed[binary_index + 31]};
         unpacked[field_idx] = DVXLFromBinary(binary_block);
     }
     return unpacked;
@@ -164,7 +164,7 @@ DvxlGrid DVXLGrid::GetMessageRepresentation()
     message_rep.OOB_b = default_dvxl.b;
     message_rep.OOB_a = default_dvxl.a;
     std::vector<DVXL> raw_data = dvxl_grid_.GetRawData();
-    std::vector<u_int8_t> binary_data = PackBinaryRepresentation(raw_data);
+    std::vector<uint8_t> binary_data = PackBinaryRepresentation(raw_data);
     message_rep.data = ZlibHelpers::CompressBytes(binary_data);
     return message_rep;
 }
@@ -185,7 +185,7 @@ bool DVXLGrid::LoadFromMessageRepresentation(DvxlGrid& message)
     OOB_value.a = message.OOB_a;
     VoxelGrid::VoxelGrid<DVXL> new_field(origin_transform, message.dvxl_cell_size, message.dimensions.x, message.dimensions.y, message.dimensions.z, OOB_value);
     // Unpack the binary data
-    std::vector<u_int8_t> binary_representation = ZlibHelpers::DecompressBytes(message.data);
+    std::vector<uint8_t> binary_representation = ZlibHelpers::DecompressBytes(message.data);
     std::vector<DVXL> unpacked = UnpackBinaryRepresentation(binary_representation);
     if (unpacked.empty())
     {
@@ -300,7 +300,7 @@ visualization_msgs::Marker DVXLGrid::ExportSurfaceForDisplay(const std::unordere
     return display_rep;
 }
 
-visualization_msgs::Marker DVXLGrid::ExportSurfacesForDisplay(const std::map<u_int32_t, std::unordered_map<VoxelGrid::GRID_INDEX, int8_t>>& surfaces) const
+visualization_msgs::Marker DVXLGrid::ExportSurfacesForDisplay(const std::map<uint32_t, std::unordered_map<VoxelGrid::GRID_INDEX, int8_t>>& surfaces) const
 {
     // Assemble a visualization_markers::Marker representation of the SDF to display in RViz
     visualization_msgs::Marker display_rep;
@@ -317,7 +317,7 @@ visualization_msgs::Marker DVXLGrid::ExportSurfacesForDisplay(const std::map<u_i
     display_rep.scale.y = GetResolution();
     display_rep.scale.z = GetResolution();
     // Add all the cells of the surface
-    std::map<u_int32_t, std::unordered_map<VoxelGrid::GRID_INDEX, int8_t>>::const_iterator surfaces_itr;
+    std::map<uint32_t, std::unordered_map<VoxelGrid::GRID_INDEX, int8_t>>::const_iterator surfaces_itr;
     for (surfaces_itr = surfaces.begin(); surfaces_itr != surfaces.end(); ++surfaces_itr)
     {
         const std::unordered_map<VoxelGrid::GRID_INDEX, int8_t>& surface = surfaces_itr->second;
@@ -353,9 +353,9 @@ visualization_msgs::Marker DVXLGrid::ExportSurfacesForDisplay(const std::map<u_i
     return display_rep;
 }
 
-std::map<u_int32_t, std::unordered_map<VoxelGrid::GRID_INDEX, int8_t>> DVXLGrid::ExtractObjectSurfaces() const
+std::map<uint32_t, std::unordered_map<VoxelGrid::GRID_INDEX, int8_t>> DVXLGrid::ExtractObjectSurfaces() const
 {
-    std::map<u_int32_t, std::unordered_map<VoxelGrid::GRID_INDEX, int8_t>> object_surfaces;
+    std::map<uint32_t, std::unordered_map<VoxelGrid::GRID_INDEX, int8_t>> object_surfaces;
     // Loop through the grid and extract surface cells for each component
     for (int64_t x_index = 0; x_index < dvxl_grid_.GetNumXCells(); x_index++)
     {
@@ -414,7 +414,7 @@ DVXL DVXLGrid::GetByIndexFromGridAndSurface(const int64_t x_index, const int64_t
     }
 }
 
-std::pair<int32_t, int32_t> DVXLGrid::ComputeHolesInSurface(const u_int32_t object_id, std::unordered_map<VoxelGrid::GRID_INDEX, int8_t> surface, const bool verbose) const
+std::pair<int32_t, int32_t> DVXLGrid::ComputeHolesInSurface(const uint32_t object_id, std::unordered_map<VoxelGrid::GRID_INDEX, int8_t> surface, const bool verbose) const
 {
     // We have a list of all voxels with an exposed surface face
     // We loop through this list of voxels, and convert each voxel
@@ -455,7 +455,7 @@ std::pair<int32_t, int32_t> DVXLGrid::ComputeHolesInSurface(const u_int32_t obje
     std::unordered_map<VoxelGrid::GRID_INDEX, int8_t> surface_vertices;
 #endif
     // Loop through all the surface voxels and extract surface vertices
-    u_int64_t surface_size = 0;
+    uint64_t surface_size = 0;
     std::unordered_map<VoxelGrid::GRID_INDEX, int8_t>::const_iterator surface_itr;
     for (surface_itr = surface.begin(); surface_itr != surface.end(); ++surface_itr)
     {
@@ -546,7 +546,7 @@ std::pair<int32_t, int32_t> DVXLGrid::ComputeHolesInSurface(const u_int32_t obje
     int32_t M6 = 0;
     // Store the connectivity of each vertex
     size_t vertex_connectivity_size_hint = surface_vertices.size();
-    std::unordered_map<VoxelGrid::GRID_INDEX, u_int8_t> vertex_connectivity(vertex_connectivity_size_hint);
+    std::unordered_map<VoxelGrid::GRID_INDEX, uint8_t> vertex_connectivity(vertex_connectivity_size_hint);
     std::unordered_map<VoxelGrid::GRID_INDEX, int8_t>::iterator surface_vertices_itr;
     for (surface_vertices_itr = surface_vertices.begin(); surface_vertices_itr != surface_vertices.end(); ++surface_vertices_itr)
     {
@@ -648,19 +648,19 @@ std::pair<int32_t, int32_t> DVXLGrid::ComputeHolesInSurface(const u_int32_t obje
     return std::pair<int32_t, int32_t>(number_of_holes, number_of_voids);
 }
 
-int32_t DVXLGrid::ComputeConnectivityOfSurfaceVertices(const std::unordered_map<VoxelGrid::GRID_INDEX, u_int8_t>& surface_vertices_connectivity) const
+int32_t DVXLGrid::ComputeConnectivityOfSurfaceVertices(const std::unordered_map<VoxelGrid::GRID_INDEX, uint8_t>& surface_vertices_connectivity) const
 {
     int32_t connected_components = 0;
     int64_t processed_vertices = 0;
     size_t vertex_components_size_hint = surface_vertices_connectivity.size();
     std::unordered_map<VoxelGrid::GRID_INDEX, int32_t> vertex_components(vertex_components_size_hint);
     // Iterate through the vertices
-    std::unordered_map<VoxelGrid::GRID_INDEX, u_int8_t>::const_iterator surface_vertices_itr;
+    std::unordered_map<VoxelGrid::GRID_INDEX, uint8_t>::const_iterator surface_vertices_itr;
     for (surface_vertices_itr = surface_vertices_connectivity.begin(); surface_vertices_itr != surface_vertices_connectivity.end(); ++surface_vertices_itr)
     {
         VoxelGrid::GRID_INDEX key = surface_vertices_itr->first;
         VoxelGrid::GRID_INDEX location = key;
-        //const u_int8_t& connectivity = surface_vertices_itr->second.second;
+        //const uint8_t& connectivity = surface_vertices_itr->second.second;
         // First, check if the vertex has already been marked
         if (vertex_components[key] > 0)
         {
@@ -690,12 +690,12 @@ int32_t DVXLGrid::ComputeConnectivityOfSurfaceVertices(const std::unordered_map<
                 vertex_components[current_vertex] = connected_components;
                 // Check the six possibly-connected vertices and add them to the queue if they are connected
                 // Get the connectivity of our index
-                std::unordered_map<VoxelGrid::GRID_INDEX, u_int8_t>::const_iterator found_connectivity = surface_vertices_connectivity.find(current_vertex);
+                std::unordered_map<VoxelGrid::GRID_INDEX, uint8_t>::const_iterator found_connectivity = surface_vertices_connectivity.find(current_vertex);
                 if (found_connectivity == surface_vertices_connectivity.end())
                 {
                     std::cerr << "Surface vertex list is incomplete" << std::endl;
                 }
-                u_int8_t connectivity = found_connectivity->second;
+                uint8_t connectivity = found_connectivity->second;
                 // Go through the neighbors
                 if ((connectivity & 0b00000001) > 0)
                 {

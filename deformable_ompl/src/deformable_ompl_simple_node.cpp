@@ -475,12 +475,12 @@ bool PlanSimplePathServiceCB(deformable_ompl::PlanSimplePath::Request& req, defo
     }
     clock_gettime(CLOCK_MONOTONIC, &et);
     // Get some statistics
-    std::vector<u_int64_t> movement_counts = dvxl_checker.GetValidInvalidMovementCounts();
+    std::vector<uint64_t> movement_counts = dvxl_checker.GetValidInvalidMovementCounts();
     ROS_INFO("DVXL Checker evaluated %lu valid movements and %lu invalid movements, of invalid movements, %lu were state-invalid and %lu were puncture-invalid, %lu fast-invalid", movement_counts[0], movement_counts[1], movement_counts[2], movement_counts[3], movement_counts[4]);
     if (status == ompl::base::PlannerStatus::EXACT_SOLUTION || status == ompl::base::PlannerStatus::APPROXIMATE_SOLUTION)
     {
         // Get the solution path
-        boost::shared_ptr<ompl::geometric::PathGeometric> path = boost::static_pointer_cast<ompl::geometric::PathGeometric>(problem_definition->getSolutionPath());
+        std::shared_ptr<ompl::geometric::PathGeometric> path = std::static_pointer_cast<ompl::geometric::PathGeometric>(problem_definition->getSolutionPath());
         // Pack the solution path into the response
         res.result.path.clear();
         std::vector<ompl::base::State*> states = path->getStates();
@@ -491,8 +491,8 @@ bool PlanSimplePathServiceCB(deformable_ompl::PlanSimplePath::Request& req, defo
         first_path_state.x = first_state_position.x();
         first_path_state.y = first_state_position.y();
         first_path_state.yaw = first_probe_state->getRotation();
-        first_path_state.deformation_cost = dvxl_cost_fn->stateCost(first_probe_state).GET_OMPL_COST;
-        first_path_state.length_cost = path_length_cost_fn->stateCost(first_probe_state).GET_OMPL_COST;
+        first_path_state.deformation_cost = dvxl_cost_fn->stateCost(first_probe_state).value();
+        first_path_state.length_cost = path_length_cost_fn->stateCost(first_probe_state).value();
         res.result.path.push_back(first_path_state);
         // Add the following states
         for (size_t idx = 1; idx < states.size(); idx++)
@@ -510,8 +510,8 @@ bool PlanSimplePathServiceCB(deformable_ompl::PlanSimplePath::Request& req, defo
                 path_state.x = position.x();
                 path_state.y = position.y();
                 path_state.yaw = end_probe_state->getRotation();
-                path_state.deformation_cost = dvxl_cost_fn->stateCost(end_probe_state).GET_OMPL_COST;
-                path_state.length_cost = path_length_cost_fn->stateCost(end_probe_state).GET_OMPL_COST;
+                path_state.deformation_cost = dvxl_cost_fn->stateCost(end_probe_state).value();
+                path_state.length_cost = path_length_cost_fn->stateCost(end_probe_state).value();
                 res.result.path.push_back(path_state);
             }
             // If there is more than one segment, interpolate between the start and end
@@ -528,8 +528,8 @@ bool PlanSimplePathServiceCB(deformable_ompl::PlanSimplePath::Request& req, defo
                     path_state.x = position.x();
                     path_state.y = position.y();
                     path_state.yaw = intermediate_state->as<deformable_ompl::SimpleProbeStateSpace::StateType>()->getRotation();
-                    path_state.deformation_cost = dvxl_cost_fn->stateCost(intermediate_state).GET_OMPL_COST;
-                    path_state.length_cost = path_length_cost_fn->stateCost(intermediate_state).GET_OMPL_COST;
+                    path_state.deformation_cost = dvxl_cost_fn->stateCost(intermediate_state).value();
+                    path_state.length_cost = path_length_cost_fn->stateCost(intermediate_state).value();
                     res.result.path.push_back(path_state);
                 }
                 space_information->freeState(intermediate_state);
@@ -548,7 +548,7 @@ bool PlanSimplePathServiceCB(deformable_ompl::PlanSimplePath::Request& req, defo
         double secs = (double)(et.tv_sec - st.tv_sec);
         secs = secs + ((double)(et.tv_nsec - st.tv_nsec) / 1000000000.0);
         res.result.run_time = secs;
-        res.result.total_cost = path->cost(cost_fn).GET_OMPL_COST;
+        res.result.total_cost = path->cost(cost_fn).value();
         res.result.total_length = path->length();
         // Set the status and return
         if (status == ompl::base::PlannerStatus::EXACT_SOLUTION)
@@ -694,8 +694,8 @@ std::vector<deformable_ompl::SimplePathState> ShortcutPath(const std::vector<def
     int32_t raw_offset_index = base_index + (int32_t)((double)original_path.size() * offset_fraction); // Could be out of bounds
     int32_t safe_offset_index = std::max(0, std::min(raw_offset_index, (int32_t)(original_path.size() - 1))); // Make sure it's in bounds
     // Get the start and end indices
-    u_int32_t start_index = (u_int32_t)std::min(base_index, safe_offset_index);
-    u_int32_t end_index = (u_int32_t)std::max(base_index, safe_offset_index);
+    uint32_t start_index = (uint32_t)std::min(base_index, safe_offset_index);
+    uint32_t end_index = (uint32_t)std::max(base_index, safe_offset_index);
     // Copy the first part of the original path
     shortcut_path.insert(shortcut_path.end(), original_path.begin(), original_path.begin() + start_index);
     // Interpolate between start and end index
@@ -798,8 +798,8 @@ bool SimplifySimplePathServiceCB(deformable_ompl::SimplifySimplePath::Request& r
     double current_length = original_length;
     double current_dvxl_cost = original_dvxl_cost;
     std::vector<deformable_ompl::SimplePathState> current_path = resample_res.result.resampled_path;
-    u_int32_t num_iterations = 0;
-    u_int32_t failed_iterations = 0;
+    uint32_t num_iterations = 0;
+    uint32_t failed_iterations = 0;
     while (num_iterations < req.query.max_iterations && failed_iterations < req.query.max_failed_iterations && current_path.size() > 2)
     {
         std::cout << "Shortcut iteration " << num_iterations << std::endl;

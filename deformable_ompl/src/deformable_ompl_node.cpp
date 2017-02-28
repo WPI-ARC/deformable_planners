@@ -677,12 +677,12 @@ DVXLGrid RebuildEnvironment(std::vector<deformable_ompl::ObstacleConfig>& obstac
 /*
  * Function to sample n possible goal states, and then select the lowest cost goal state
  */
-Eigen::Affine3d SampleGoalState(const ompl::base::GoalPtr& goal_region, const deformable_ompl::ProbeDVXLCostValidityChecker& dvxl_checker, const u_int32_t num_presampled_goals)
+Eigen::Affine3d SampleGoalState(const ompl::base::GoalPtr& goal_region, const deformable_ompl::ProbeDVXLCostValidityChecker& dvxl_checker, const uint32_t num_presampled_goals)
 {
     ROS_INFO("Sampling %u potential goals...", num_presampled_goals);
     // Sample n goals
     std::vector<std::pair<double, Eigen::Affine3d>> sampled_goals(num_presampled_goals);
-    for (u_int32_t idx = 0; idx < num_presampled_goals; idx++)
+    for (uint32_t idx = 0; idx < num_presampled_goals; idx++)
     {
         Eigen::Affine3d sampled_goal = goal_region->as<SampleableProbeGoalRegion>()->sampleValidInitialGoal();
         double sampled_goal_cost = dvxl_checker.CheckStateTransformCost(sampled_goal);
@@ -855,12 +855,12 @@ bool ProbePlanPathServiceCB(deformable_ompl::PlanPath::Request& req, deformable_
     }
     clock_gettime(CLOCK_MONOTONIC, &et);
     // Get some statistics
-    std::vector<u_int64_t> movement_counts = dvxl_checker.GetValidInvalidMovementCounts();
+    std::vector<uint64_t> movement_counts = dvxl_checker.GetValidInvalidMovementCounts();
     ROS_INFO("DVXL Checker evaluated %lu valid movements and %lu invalid movements, of invalid movements, %lu were state-invalid and %lu were puncture-invalid, %lu fast-invalid", movement_counts[0], movement_counts[1], movement_counts[2], movement_counts[3], movement_counts[4]);
     if (status == ompl::base::PlannerStatus::EXACT_SOLUTION || status == ompl::base::PlannerStatus::APPROXIMATE_SOLUTION)
     {
         // Get the solution path
-        boost::shared_ptr<ompl::geometric::PathGeometric> path = boost::static_pointer_cast<ompl::geometric::PathGeometric>(problem_definition->getSolutionPath());
+        std::shared_ptr<ompl::geometric::PathGeometric> path = std::static_pointer_cast<ompl::geometric::PathGeometric>(problem_definition->getSolutionPath());
         // Pack the solution path into the response
         res.result.path.clear();
         std::vector<ompl::base::State*> states = path->getStates();
@@ -876,8 +876,8 @@ bool ProbePlanPathServiceCB(deformable_ompl::PlanPath::Request& req, deformable_
         first_path_state.orientation.x = first_state_orientation.x();
         first_path_state.orientation.y = first_state_orientation.y();
         first_path_state.orientation.z = first_state_orientation.z();
-        first_path_state.deformation_cost = dvxl_cost_fn->stateCost(first_probe_state).GET_OMPL_COST;
-        first_path_state.length_cost = path_length_cost_fn->stateCost(first_probe_state).GET_OMPL_COST;
+        first_path_state.deformation_cost = dvxl_cost_fn->stateCost(first_probe_state).value();
+        first_path_state.length_cost = path_length_cost_fn->stateCost(first_probe_state).value();
         res.result.path.push_back(first_path_state);
         // Add the following states
         for (size_t idx = 1; idx < states.size(); idx++)
@@ -900,8 +900,8 @@ bool ProbePlanPathServiceCB(deformable_ompl::PlanPath::Request& req, deformable_
                 path_state.orientation.x = orientation.x();
                 path_state.orientation.y = orientation.y();
                 path_state.orientation.z = orientation.z();
-                path_state.deformation_cost = dvxl_cost_fn->stateCost(end_probe_state).GET_OMPL_COST;
-                path_state.length_cost = path_length_cost_fn->stateCost(end_probe_state).GET_OMPL_COST;
+                path_state.deformation_cost = dvxl_cost_fn->stateCost(end_probe_state).value();
+                path_state.length_cost = path_length_cost_fn->stateCost(end_probe_state).value();
                 res.result.path.push_back(path_state);
             }
             // If there is more than one segment, interpolate between the start and end
@@ -923,8 +923,8 @@ bool ProbePlanPathServiceCB(deformable_ompl::PlanPath::Request& req, deformable_
                     path_state.orientation.x = orientation.x();
                     path_state.orientation.y = orientation.y();
                     path_state.orientation.z = orientation.z();
-                    path_state.deformation_cost = dvxl_cost_fn->stateCost(intermediate_state).GET_OMPL_COST;
-                    path_state.length_cost = path_length_cost_fn->stateCost(intermediate_state).GET_OMPL_COST;
+                    path_state.deformation_cost = dvxl_cost_fn->stateCost(intermediate_state).value();
+                    path_state.length_cost = path_length_cost_fn->stateCost(intermediate_state).value();
                     res.result.path.push_back(path_state);
                 }
                 space_information->freeState(intermediate_state);
@@ -967,7 +967,7 @@ bool ProbePlanPathServiceCB(deformable_ompl::PlanPath::Request& req, deformable_
         double secs = (double)(et.tv_sec - st.tv_sec);
         secs = secs + ((double)(et.tv_nsec - st.tv_nsec) / 1000000000.0);
         res.result.run_time = secs;
-        res.result.total_cost = path->cost(cost_fn).GET_OMPL_COST;
+        res.result.total_cost = path->cost(cost_fn).value();
         res.result.total_length = path->length();
         // Set the status and return
         if (status == ompl::base::PlannerStatus::EXACT_SOLUTION)
@@ -1182,8 +1182,8 @@ std::vector<deformable_ompl::PathState> ShortcutPath(const std::vector<deformabl
     int32_t raw_offset_index = base_index + (int32_t)((double)original_path.size() * offset_fraction); // Could be out of bounds
     int32_t safe_offset_index = std::max(0, std::min(raw_offset_index, (int32_t)(original_path.size() - 1))); // Make sure it's in bounds
     // Get the start and end indices
-    u_int32_t start_index = (u_int32_t)std::min(base_index, safe_offset_index);
-    u_int32_t end_index = (u_int32_t)std::max(base_index, safe_offset_index);
+    uint32_t start_index = (uint32_t)std::min(base_index, safe_offset_index);
+    uint32_t end_index = (uint32_t)std::max(base_index, safe_offset_index);
     // Copy the first part of the original path
     shortcut_path.insert(shortcut_path.end(), original_path.begin(), original_path.begin() + start_index);
     // Interpolate between start and end index
@@ -1304,8 +1304,8 @@ bool SimplifyPathServiceCB(deformable_ompl::SimplifyPath::Request& req, deformab
     double current_length = original_length;
     double current_dvxl_cost = original_dvxl_cost;
     std::vector<deformable_ompl::PathState> current_path = resample_res.result.resampled_path;
-    u_int32_t num_iterations = 0;
-    u_int32_t failed_iterations = 0;
+    uint32_t num_iterations = 0;
+    uint32_t failed_iterations = 0;
     while (num_iterations < req.query.max_iterations && failed_iterations < req.query.max_failed_iterations && current_path.size() > 2)
     {
         std::cout << "Shortcut iteration " << num_iterations << std::endl;
@@ -1481,10 +1481,10 @@ bool ComputeTrialSetupServiceCB(deformable_ompl::ComputeTrialSetup::Request& req
     // We want to avoid edge points at the very end of an edge
     // Pick two points at random
     ompl::RNG prng;
-    u_int32_t random_first_edge_point_index = (u_int32_t)prng.uniformInt(0, minimum_voronoi_points.size() - 1);
-    u_int32_t random_second_edge_point_index = (u_int32_t)prng.uniformInt(0, minimum_voronoi_points.size() - 1);
-    //u_int32_t edge_point_index = (random_first_edge_point_index / 2) + (random_second_edge_point_index / 2);
-    u_int32_t edge_point_index = random_first_edge_point_index;
+    uint32_t random_first_edge_point_index = (uint32_t)prng.uniformInt(0, minimum_voronoi_points.size() - 1);
+    uint32_t random_second_edge_point_index = (uint32_t)prng.uniformInt(0, minimum_voronoi_points.size() - 1);
+    //uint32_t edge_point_index = (random_first_edge_point_index / 2) + (random_second_edge_point_index / 2);
+    uint32_t edge_point_index = random_first_edge_point_index;
     ROS_INFO("Ranbom indices: %u, %u, selected %u as edge point index", random_first_edge_point_index, random_second_edge_point_index, edge_point_index);
     Eigen::Vector3d edge_point = minimum_voronoi_points[edge_point_index];
     ROS_INFO("...selected edge point: %s from %zu possibilities", PrettyPrint::PrettyPrint(edge_point).c_str(), minimum_voronoi_points.size());
@@ -1517,7 +1517,7 @@ bool ComputeTrialSetupServiceCB(deformable_ompl::ComputeTrialSetup::Request& req
     // - "inside" according to the watershed map
     // - >= probe diameter from an obstacle
     ROS_INFO("Searching for a target point with %u checks...", req.query.maximum_target_checks);
-    u_int32_t target_checks = 0;
+    uint32_t target_checks = 0;
     while (target_checks < req.query.maximum_target_checks)
     {
         // Pick a random target point around the edge point
@@ -1691,11 +1691,11 @@ void test_CMG_topology()
         }
     }
     std::cout << "Computing connected components and genus..." << std::endl;
-    std::map<u_int32_t, std::pair<int32_t, int32_t>> connected_component_topology = cmg.ComputeComponentTopology(true, true, true);
+    std::map<uint32_t, std::pair<int32_t, int32_t>> connected_component_topology = cmg.ComputeComponentTopology(true, true, true);
     int32_t num_connected_components = 0;
     int32_t num_holes = 0;
     int32_t num_voids = 0;
-    std::map<u_int32_t, std::pair<int32_t, int32_t>>::iterator connected_component_topology_itr;
+    std::map<uint32_t, std::pair<int32_t, int32_t>>::iterator connected_component_topology_itr;
     for (connected_component_topology_itr = connected_component_topology.begin(); connected_component_topology_itr != connected_component_topology.end(); ++connected_component_topology_itr)
     {
         std::cout << "...component " << connected_component_topology_itr->first << " has " << connected_component_topology_itr->second.first << " holes and " << connected_component_topology_itr->second.second << " voids..." << std::endl;

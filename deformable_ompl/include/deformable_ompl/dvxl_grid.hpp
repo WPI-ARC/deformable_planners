@@ -25,27 +25,27 @@ namespace deformable_ompl
         float g;
         float b;
         float a;
-        u_int32_t object_id;
+        uint32_t object_id;
     };
 
-    inline std::vector<u_int8_t> DVXLToBinary(DVXL value)
+    inline std::vector<uint8_t> DVXLToBinary(DVXL value)
     {
-        std::vector<u_int8_t> binary(32);
+        std::vector<uint8_t> binary(32);
         // Copy the floats into binary values
-        u_int32_t deformability_binary_value = 0;
-        memcpy(&deformability_binary_value, &value.deformability, sizeof(u_int32_t));
-        u_int32_t sensitivity_binary_value = 0;
-        memcpy(&sensitivity_binary_value, &value.sensitivity, sizeof(u_int32_t));
-        u_int32_t mass_binary_value = 0;
-        memcpy(&mass_binary_value, &value.mass, sizeof(u_int32_t));
-        u_int32_t r_binary_value = 0;
-        memcpy(&r_binary_value, &value.r, sizeof(u_int32_t));
-        u_int32_t g_binary_value = 0;
-        memcpy(&g_binary_value, &value.g, sizeof(u_int32_t));
-        u_int32_t b_binary_value = 0;
-        memcpy(&b_binary_value, &value.b, sizeof(u_int32_t));
-        u_int32_t a_binary_value = 0;
-        memcpy(&a_binary_value, &value.a, sizeof(u_int32_t));
+        uint32_t deformability_binary_value = 0;
+        memcpy(&deformability_binary_value, &value.deformability, sizeof(uint32_t));
+        uint32_t sensitivity_binary_value = 0;
+        memcpy(&sensitivity_binary_value, &value.sensitivity, sizeof(uint32_t));
+        uint32_t mass_binary_value = 0;
+        memcpy(&mass_binary_value, &value.mass, sizeof(uint32_t));
+        uint32_t r_binary_value = 0;
+        memcpy(&r_binary_value, &value.r, sizeof(uint32_t));
+        uint32_t g_binary_value = 0;
+        memcpy(&g_binary_value, &value.g, sizeof(uint32_t));
+        uint32_t b_binary_value = 0;
+        memcpy(&b_binary_value, &value.b, sizeof(uint32_t));
+        uint32_t a_binary_value = 0;
+        memcpy(&a_binary_value, &value.a, sizeof(uint32_t));
         // Pack the binary values into a vector of bytes
         // Pack deformability
         // Copy byte 1, least-significant byte
@@ -131,7 +131,7 @@ namespace deformable_ompl
         // Copy byte 4, most-significant byte
         a_binary_value = a_binary_value >> 8;
         binary[24] = a_binary_value & 0x000000ff;
-        u_int32_t object_id_binary_value = value.object_id;
+        uint32_t object_id_binary_value = value.object_id;
         // Pack object_id
         // Copy byte 1, least-significant byte
         binary[31] = object_id_binary_value & 0x000000ff;
@@ -147,7 +147,7 @@ namespace deformable_ompl
         return binary;
     }
 
-    inline DVXL DVXLFromBinary(std::vector<u_int8_t>& binary)
+    inline DVXL DVXLFromBinary(std::vector<uint8_t>& binary)
     {
         if (binary.size() != 32)
         {
@@ -167,7 +167,7 @@ namespace deformable_ompl
         {
             DVXL loaded;
             // Copy the bytes into binary values
-            u_int32_t deformability_binary_value = 0;
+            uint32_t deformability_binary_value = 0;
             // Copy in byte 4, most-significant byte
             deformability_binary_value = deformability_binary_value | binary[0];
             deformability_binary_value = deformability_binary_value << 8;
@@ -179,7 +179,7 @@ namespace deformable_ompl
             deformability_binary_value = deformability_binary_value << 8;
             // Copy in byte 1, least-significant byte
             deformability_binary_value = deformability_binary_value | binary[3];
-            u_int32_t sensitivity_binary_value = 0;
+            uint32_t sensitivity_binary_value = 0;
             // Copy in byte 4, most-significant byte
             sensitivity_binary_value = sensitivity_binary_value | binary[4];
             sensitivity_binary_value = sensitivity_binary_value << 8;
@@ -191,7 +191,7 @@ namespace deformable_ompl
             sensitivity_binary_value = sensitivity_binary_value << 8;
             // Copy in byte 1, least-significant byte
             sensitivity_binary_value = sensitivity_binary_value | binary[7];
-            u_int32_t mass_binary_value = 0;
+            uint32_t mass_binary_value = 0;
             // Copy in byte 4, most-significant byte
             mass_binary_value = mass_binary_value | binary[8];
             mass_binary_value = mass_binary_value << 8;
@@ -203,7 +203,7 @@ namespace deformable_ompl
             mass_binary_value = mass_binary_value << 8;
             // Copy in byte 1, least-significant byte
             mass_binary_value = mass_binary_value | binary[11];
-            u_int32_t r_binary_value = 0;
+            uint32_t r_binary_value = 0;
             // Copy in byte 4, most-significant byte
             r_binary_value = r_binary_value | binary[12];
             r_binary_value = r_binary_value << 8;
@@ -215,7 +215,7 @@ namespace deformable_ompl
             r_binary_value = r_binary_value << 8;
             // Copy in byte 1, least-significant byte
             r_binary_value = r_binary_value | binary[15];
-            u_int32_t g_binary_value = 0;
+            uint32_t g_binary_value = 0;
             // Copy in byte 4, most-significant byte
             g_binary_value = g_binary_value | binary[16];
             g_binary_value = g_binary_value << 8;
@@ -227,7 +227,7 @@ namespace deformable_ompl
             g_binary_value = g_binary_value << 8;
             // Copy in byte 1, least-significant byte
             g_binary_value = g_binary_value | binary[19];
-            u_int32_t b_binary_value = 0;
+            uint32_t b_binary_value = 0;
             // Copy in byte 4, most-significant byte
             b_binary_value = b_binary_value | binary[20];
             b_binary_value = b_binary_value << 8;
@@ -239,7 +239,7 @@ namespace deformable_ompl
             b_binary_value = b_binary_value << 8;
             // Copy in byte 1, least-significant byte
             b_binary_value = b_binary_value | binary[23];
-            u_int32_t a_binary_value = 0;
+            uint32_t a_binary_value = 0;
             // Copy in byte 4, most-significant byte
             a_binary_value = a_binary_value | binary[24];
             a_binary_value = a_binary_value << 8;
@@ -251,7 +251,7 @@ namespace deformable_ompl
             a_binary_value = a_binary_value << 8;
             // Copy in byte 1, least-significant byte
             a_binary_value = a_binary_value | binary[27];
-            u_int32_t object_id_binary_value = 0;
+            uint32_t object_id_binary_value = 0;
             // Copy in byte 4, most-significant byte
             object_id_binary_value = object_id_binary_value | binary[28];
             object_id_binary_value = object_id_binary_value << 8;
@@ -271,7 +271,7 @@ namespace deformable_ompl
             memcpy(&loaded.g, &g_binary_value, sizeof(float));
             memcpy(&loaded.b, &b_binary_value, sizeof(float));
             memcpy(&loaded.a, &a_binary_value, sizeof(float));
-            memcpy(&loaded.object_id, &object_id_binary_value, sizeof(u_int32_t));
+            memcpy(&loaded.object_id, &object_id_binary_value, sizeof(uint32_t));
             return loaded;
         }
     }
@@ -298,7 +298,7 @@ namespace deformable_ompl
                 return false;
             }
             // Empty cells are automatically not surface cells
-            u_int32_t our_object_id = dvxl_grid_.GetImmutable(x_index, y_index, z_index).first.object_id;
+            uint32_t our_object_id = dvxl_grid_.GetImmutable(x_index, y_index, z_index).first.object_id;
             if (our_object_id == 0)
             {
                 return false;
@@ -351,9 +351,9 @@ namespace deformable_ompl
             return false;
         }
 
-        std::vector<u_int8_t> PackBinaryRepresentation(const std::vector<DVXL>& raw) const;
+        std::vector<uint8_t> PackBinaryRepresentation(const std::vector<DVXL>& raw) const;
 
-        std::vector<DVXL> UnpackBinaryRepresentation(std::vector<u_int8_t>& packed);
+        std::vector<DVXL> UnpackBinaryRepresentation(std::vector<uint8_t>& packed);
 
         DVXL GetByIndexFromGridAndSurface(const int64_t x_index, const int64_t y_index, const int64_t z_index, const std::unordered_map<VoxelGrid::GRID_INDEX, int8_t>& surface) const;
 
@@ -499,13 +499,13 @@ namespace deformable_ompl
 
         visualization_msgs::Marker ExportSurfaceForDisplay(const std::unordered_map<VoxelGrid::GRID_INDEX, int8_t>& surface) const;
 
-        visualization_msgs::Marker ExportSurfacesForDisplay(const std::map<u_int32_t, std::unordered_map<VoxelGrid::GRID_INDEX, int8_t>>& surfaces) const;
+        visualization_msgs::Marker ExportSurfacesForDisplay(const std::map<uint32_t, std::unordered_map<VoxelGrid::GRID_INDEX, int8_t>>& surfaces) const;
 
-        std::map<u_int32_t, std::unordered_map<VoxelGrid::GRID_INDEX, int8_t>> ExtractObjectSurfaces() const;
+        std::map<uint32_t, std::unordered_map<VoxelGrid::GRID_INDEX, int8_t>> ExtractObjectSurfaces() const;
 
-        std::pair<int32_t, int32_t> ComputeHolesInSurface(const u_int32_t object_id, std::unordered_map<VoxelGrid::GRID_INDEX, int8_t> surface, const bool verbose) const;
+        std::pair<int32_t, int32_t> ComputeHolesInSurface(const uint32_t object_id, std::unordered_map<VoxelGrid::GRID_INDEX, int8_t> surface, const bool verbose) const;
 
-        int32_t ComputeConnectivityOfSurfaceVertices(const std::unordered_map<VoxelGrid::GRID_INDEX, u_int8_t>& surface_vertices_connectivity) const;
+        int32_t ComputeConnectivityOfSurfaceVertices(const std::unordered_map<VoxelGrid::GRID_INDEX, uint8_t>& surface_vertices_connectivity) const;
     };
 }
 

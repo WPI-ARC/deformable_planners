@@ -20,7 +20,7 @@ namespace deformable_ompl
     {
         Eigen::Vector3d position;
         Eigen::Vector3d gradient;
-        u_int32_t component;
+        uint32_t component;
         float penetration;
     } COLLISION_INFO;
 
@@ -31,7 +31,7 @@ namespace deformable_ompl
         bool initialized_;
         sdf_tools::SignedDistanceField sdf_;
         sdf_tools::CollisionMapGrid collision_map_;
-        std::map<u_int32_t, sdf_tools::SignedDistanceField> object_sdfs_;
+        std::map<uint32_t, sdf_tools::SignedDistanceField> object_sdfs_;
         DVXLGrid environment_;
 
         inline double DVXLCost(const DVXL& dvxl1, const DVXL& dvxl2) const
@@ -164,8 +164,8 @@ namespace deformable_ompl
 
         typedef struct
         {
-            u_int32_t location[3];
-            u_int32_t closest_point[3];
+            uint32_t location[3];
+            uint32_t closest_point[3];
             double distance_square;
             int32_t update_direction;
         } bucket_cell;
@@ -238,11 +238,11 @@ namespace deformable_ompl
             return neighborhoods;
         }
 
-        std::vector<u_int32_t> GetAllObjectIDs(const DVXLGrid& environment);
+        std::vector<uint32_t> GetAllObjectIDs(const DVXLGrid& environment);
 
         DistanceField BuildDistanceField(std::vector<VoxelGrid::GRID_INDEX>& points, Eigen::Affine3d origin_transform, double cell_size, double x_size, double y_size, double z_size);
 
-        std::pair<sdf_tools::SignedDistanceField, sdf_tools::CollisionMapGrid> UpdateInternalGrids(DVXLGrid& environment, std::vector<u_int32_t>& objects_to_use);
+        std::pair<sdf_tools::SignedDistanceField, sdf_tools::CollisionMapGrid> UpdateInternalGrids(DVXLGrid& environment, std::vector<uint32_t>& objects_to_use);
 
     public:
 
@@ -297,7 +297,7 @@ namespace deformable_ompl
             return environment_;
         }
 
-        std::vector<Eigen::Vector3d> ExtractMinimumVoronoiPoints(const u_int32_t first_object_id, const u_int32_t second_object_id) const;
+        std::vector<Eigen::Vector3d> ExtractMinimumVoronoiPoints(const uint32_t first_object_id, const uint32_t second_object_id) const;
 
         std::vector<Eigen::Vector3d> ExtractLocalMinima(const double closeness_threshold) const;
 
@@ -319,25 +319,25 @@ namespace deformable_ompl
 
         void RemovePoints(const DVXLGrid& other_grid, const Eigen::Affine3d base_transform, const bool remove_neighbors);
 
-        std::map<u_int32_t, std::vector<COLLISION_INFO>> GetCollisionInfo(const std::vector<std::pair<Eigen::Vector3d, DVXL>>& points) const;
+        std::map<uint32_t, std::vector<COLLISION_INFO>> GetCollisionInfo(const std::vector<std::pair<Eigen::Vector3d, DVXL>>& points) const;
 
-        std::map<u_int32_t, std::vector<COLLISION_INFO>> GetCollisionInfo(const std::vector<std::pair<Eigen::Vector3d, DVXL>>& points, const Eigen::Affine3d base_transform) const;
+        std::map<uint32_t, std::vector<COLLISION_INFO>> GetCollisionInfo(const std::vector<std::pair<Eigen::Vector3d, DVXL>>& points, const Eigen::Affine3d base_transform) const;
 
-        std::map<u_int32_t, std::vector<COLLISION_INFO>> GetCollisionInfo(const DVXLGrid& other_grid) const;
+        std::map<uint32_t, std::vector<COLLISION_INFO>> GetCollisionInfo(const DVXLGrid& other_grid) const;
 
-        std::map<u_int32_t, std::vector<COLLISION_INFO>> GetCollisionInfo(const DVXLGrid& other_grid, const Eigen::Affine3d base_transform) const;
+        std::map<uint32_t, std::vector<COLLISION_INFO>> GetCollisionInfo(const DVXLGrid& other_grid, const Eigen::Affine3d base_transform) const;
 
-        void UpdateSurfacesWithIntersectingPoints(const DVXLGrid& other_grid, std::map<u_int32_t, std::unordered_map<VoxelGrid::GRID_INDEX, int8_t>>& surfaces, const bool verbose) const;
+        void UpdateSurfacesWithIntersectingPoints(const DVXLGrid& other_grid, std::map<uint32_t, std::unordered_map<VoxelGrid::GRID_INDEX, int8_t>>& surfaces, const bool verbose) const;
 
-        void UpdateSurfacesWithIntersectingPoints(const DVXLGrid& other_grid, const Eigen::Affine3d base_transform, std::map<u_int32_t, std::unordered_map<VoxelGrid::GRID_INDEX, int8_t>>& surfaces, const bool verbose) const;
+        void UpdateSurfacesWithIntersectingPoints(const DVXLGrid& other_grid, const Eigen::Affine3d base_transform, std::map<uint32_t, std::unordered_map<VoxelGrid::GRID_INDEX, int8_t>>& surfaces, const bool verbose) const;
 
-        void UpdateSurfacesWithIntersectingPoints(const std::vector<std::pair<Eigen::Vector3d, DVXL>>& points, std::map<u_int32_t, std::unordered_map<VoxelGrid::GRID_INDEX, int8_t>>& surfaces, const bool verbose) const;
+        void UpdateSurfacesWithIntersectingPoints(const std::vector<std::pair<Eigen::Vector3d, DVXL>>& points, std::map<uint32_t, std::unordered_map<VoxelGrid::GRID_INDEX, int8_t>>& surfaces, const bool verbose) const;
 
-        void UpdateSurfacesWithIntersectingPoints(const std::vector<std::pair<Eigen::Vector3d, DVXL>>& points, const Eigen::Affine3d base_transform, std::map<u_int32_t, std::unordered_map<VoxelGrid::GRID_INDEX, int8_t>>& surfaces, const bool verbose) const;
+        void UpdateSurfacesWithIntersectingPoints(const std::vector<std::pair<Eigen::Vector3d, DVXL>>& points, const Eigen::Affine3d base_transform, std::map<uint32_t, std::unordered_map<VoxelGrid::GRID_INDEX, int8_t>>& surfaces, const bool verbose) const;
 
-        bool CheckForPuncture(std::map<u_int32_t, std::unordered_map<VoxelGrid::GRID_INDEX, int8_t>>& object_surfaces, const bool verbose) const;
+        bool CheckForPuncture(std::map<uint32_t, std::unordered_map<VoxelGrid::GRID_INDEX, int8_t>>& object_surfaces, const bool verbose) const;
 
-        bool CheckForPuncture(std::map<u_int32_t, std::unordered_map<VoxelGrid::GRID_INDEX, int8_t>>& current_object_surfaces, const std::map<u_int32_t, std::unordered_map<VoxelGrid::GRID_INDEX, int8_t>>& old_object_surfaces, const bool verbose) const;
+        bool CheckForPuncture(std::map<uint32_t, std::unordered_map<VoxelGrid::GRID_INDEX, int8_t>>& current_object_surfaces, const std::map<uint32_t, std::unordered_map<VoxelGrid::GRID_INDEX, int8_t>>& old_object_surfaces, const bool verbose) const;
     };
 }
 

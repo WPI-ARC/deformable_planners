@@ -26,13 +26,13 @@ int * TransformIndex(int x, int y, int z, state6D * state)
     return new_coords;
 }
 
-std::map<float, u_int32_t> EvaluateStateOverlap(state6D * new_state, int debug_level)
+std::map<float, uint32_t> EvaluateStateOverlap(state6D * new_state, int debug_level)
 {
 #ifdef USE_PERFORMANCE_TIMERS
     struct timespec st, et;
     clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &st);
 #endif
-    std::map<float, u_int32_t> sensivity_counts;
+    std::map<float, uint32_t> sensivity_counts;
     for (int i = 0; i < new_state->RefShape->xDim; i++)
     {
         for (int j = 0; j < new_state->RefShape->yDim; j++)
@@ -90,7 +90,7 @@ state6D * EvaluateState(state6D * new_state, state6D * goal_state, float ParetoW
     //You should probably know here that NAN "poisons" float math, so once NAN is added in, the output is always NAN
     //Also, more importantly, NAN != NAN according to the IEEE float specs, hence the use of isnan()
     debug(debug_level, 2, "Assessed state deformation cost: %f\n", state_cost);
-    if (isnan(state_cost) || isnanf(state_cost))
+    if (std::isnan(state_cost))
     {
         debug(debug_level, 2, "Invalid state - returning NULL\n");
         return NULL;
