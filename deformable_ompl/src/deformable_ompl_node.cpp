@@ -860,7 +860,11 @@ bool ProbePlanPathServiceCB(deformable_ompl::PlanPath::Request& req, deformable_
     if (status == ompl::base::PlannerStatus::EXACT_SOLUTION || status == ompl::base::PlannerStatus::APPROXIMATE_SOLUTION)
     {
         // Get the solution path
+        #if (OMPL_MAJOR_VERSION >= 1 && OMPL_MINOR_VERSION >= 2)
         std::shared_ptr<ompl::geometric::PathGeometric> path = std::static_pointer_cast<ompl::geometric::PathGeometric>(problem_definition->getSolutionPath());
+        #else
+        boost::shared_ptr<ompl::geometric::PathGeometric> path = boost::static_pointer_cast<ompl::geometric::PathGeometric>(problem_definition->getSolutionPath());
+        #endif
         // Pack the solution path into the response
         res.result.path.clear();
         std::vector<ompl::base::State*> states = path->getStates();
