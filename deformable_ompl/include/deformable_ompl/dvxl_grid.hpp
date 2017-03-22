@@ -472,9 +472,14 @@ namespace deformable_ompl
             return dvxl_grid_.GetNumZCells();
         }
 
-        inline Eigen::Affine3d GetOriginTransform() const
+        inline const Eigen::Affine3d& GetOriginTransform() const
         {
             return dvxl_grid_.GetOriginTransform();
+        }
+
+        inline const Eigen::Affine3d& GetInverseOriginTransform() const
+        {
+            return dvxl_grid_.GetInverseOriginTransform();
         }
 
         inline std::vector<int64_t> LocationToGridIndex(const double x, const double y, const double z) const

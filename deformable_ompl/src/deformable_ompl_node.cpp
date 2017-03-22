@@ -1527,8 +1527,8 @@ bool ComputeTrialSetupServiceCB(deformable_ompl::ComputeTrialSetup::Request& req
         // Pick a random target point around the edge point
         Eigen::Vector3d random_candidate_target = GenerateRandomCandidateTarget(edge_point, req.query.minimum_target_depth, req.query.maximum_target_depth, prng);
         // Check if it meets the conditions
-        const Eigen::Vector3d& local_maxima = watershed_map.GetImmutable(random_candidate_target).first;
-        std::pair<float, bool> distance_query = sdf.GetSafe(random_candidate_target);
+        const Eigen::Vector3d& local_maxima = watershed_map.GetImmutable3d(random_candidate_target).first;
+        std::pair<float, bool> distance_query = sdf.GetSafe3d(random_candidate_target);
         if (distance_query.second && distance_query.first >= req.query.minimum_target_clearance && local_maxima.x() != INFINITY && local_maxima.y() != INFINITY && local_maxima.z() != INFINITY)
         {
             ROS_INFO("...target point found: %s", PrettyPrint::PrettyPrint(random_candidate_target).c_str());

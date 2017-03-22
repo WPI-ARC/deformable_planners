@@ -9,7 +9,8 @@ find_package(catkin REQUIRED COMPONENTS roscpp rospy geometry_msgs visualization
 ## System dependencies are found with CMake's conventions
 # find_package(Boost REQUIRED COMPONENTS system)
 find_package(cmake_modules REQUIRED)
-find_package(Eigen REQUIRED)
+find_package(Eigen3 REQUIRED)
+set(Eigen3_INCLUDE_DIRS ${EIGEN3_INCLUDE_DIR})
 find_package(OMPL REQUIRED)
 
 ## Uncomment this if the package has a setup.py. This macro ensures
@@ -105,7 +106,7 @@ generate_messages(DEPENDENCIES geometry_msgs visualization_msgs std_msgs)
 ## LIBRARIES: libraries you create in this project that dependent projects also need
 ## CATKIN_DEPENDS: catkin_packages dependent projects also need
 ## DEPENDS: system dependencies of this project that dependent projects also need
-catkin_package(INCLUDE_DIRS include LIBRARIES ${PROJECT_NAME} CATKIN_DEPENDS roscpp rospy geometry_msgs visualization_msgs std_msgs sdf_tools DEPENDS system_lib z rt Eigen OMPL)
+catkin_package(INCLUDE_DIRS include LIBRARIES ${PROJECT_NAME} CATKIN_DEPENDS roscpp rospy geometry_msgs visualization_msgs std_msgs sdf_tools DEPENDS system_lib z rt Eigen3 OMPL)
 
 ###########
 ## Build ##
@@ -118,7 +119,7 @@ message(STATUS "deformable_ompl CXX_FLAGS [ ${CMAKE_CXX_FLAGS} ]")
 ## Specify additional locations of header files
 ## Your package locations should be listed before other locations
 # include_directories(include)
-include_directories(include SYSTEM ${catkin_INCLUDE_DIRS} ${Eigen_INCLUDE_DIRS} ${OMPL_INCLUDE_DIRS})
+include_directories(include SYSTEM ${catkin_INCLUDE_DIRS} ${Eigen3_INCLUDE_DIRS} ${OMPL_INCLUDE_DIRS})
 
 ## Declare a cpp library
 add_library(${PROJECT_NAME}

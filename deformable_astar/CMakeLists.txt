@@ -10,7 +10,8 @@ find_package(catkin REQUIRED COMPONENTS arc_utilities roscpp rospy roslib geomet
 # find_package(Boost REQUIRED COMPONENTS system)
 find_package(cmake_modules REQUIRED)
 find_package(OpenMP)
-find_package(Eigen REQUIRED)
+find_package(Eigen3 REQUIRED)
+set(Eigen3_INCLUDE_DIRS ${EIGEN3_INCLUDE_DIR})
 
 ## Uncomment this if the package has a setup.py. This macro ensures
 ## modules and global scripts declared therein get installed
@@ -64,7 +65,7 @@ catkin_package(
   INCLUDE_DIRS include
   LIBRARIES deformable_astar
   CATKIN_DEPENDS arc_utilities rospy roscpp geometry_msgs message_runtime std_msgs roslib tf xtf trajectory_msgs arc_utilities sdf_tools
-  DEPENDS system_lib Eigen
+  DEPENDS system_lib Eigen3
 )
 
 ###########
@@ -73,7 +74,7 @@ catkin_package(
 
 ## Specify additional locations of header files
 ## Your package locations should be listed before other locations
-include_directories(include SYSTEM ${catkin_INCLUDE_DIRS} ${Eigen_INCLUDE_DIRS})
+include_directories(include SYSTEM ${catkin_INCLUDE_DIRS} ${Eigen3_INCLUDE_DIRS})
 
 ## Set build flags
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS} -O3 -Wall -Wextra")
